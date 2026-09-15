@@ -4595,7 +4595,10 @@ function market(){
   $("#mclose").onclick = hide;
   md.onclick = function(e){ if(e.target === md) hide(); };
 
-/* 인트로는 4.6초 뒤 스스로 걷히고, 그 전에 누르거나 스크롤하면 바로 걷힌다 */
+/* 인트로는 4.6초 뒤 스스로 걷히고, 그 전에 누르거나 스크롤하면 바로 걷힌다
+   (모바일에서는 주소창이 자동으로 접히면서 로드 직후 가짜 scroll 이벤트가 발생해
+   인트로가 뜨자마자 닫혀버리는 문제가 있어, 해제 리스너는 350ms 지연 후 등록한다
+   — 2026-09-15 수정) */
 (function(){
   var iv = $("#intro");
   if(!iv) return;
@@ -4604,8 +4607,10 @@ function market(){
     ["click","keydown","wheel","touchstart","scroll"].forEach(function(e){
       window.removeEventListener(e, off, true); });
   };
-  ["click","keydown","wheel","touchstart","scroll"].forEach(function(e){
-    window.addEventListener(e, off, true); });
+  setTimeout(function(){
+    ["click","keydown","wheel","touchstart","scroll"].forEach(function(e){
+      window.addEventListener(e, off, true); });
+  }, 350);
   setTimeout(off, 4700);
 })();
   document.addEventListener("keydown", function(e){
