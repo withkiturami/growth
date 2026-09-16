@@ -502,14 +502,25 @@ table.ov tr.miss td{color:var(--mute)}
 /* 12개월/5개년 버튼이 잘 안 보인다는 지적 — 요청 2026-09-16, 4차.
    #tmodal(전체보기 모달) 쪽 같은 버튼은 이미 크게(18.5px) 잡혀 있는데,
    시세 탭 헤더의 이 버튼만 일반 .seg 기본 크기를 그대로 물려받고 있었다 */
-#mspan{background:var(--card);border-color:var(--line)}
+/* 버튼 3개 중 선택 안 된 것들은 배경색 없는 투명 글씨라 버튼처럼 안 보인다는
+   지적 — 요청 2026-09-16, 7차. 안 눌린 버튼에도 자기 테두리를 줘서 항상
+   "버튼 묶음"으로 보이게 하고, 눌린 버튼만 테두리 없이 꽉 찬 색으로 둔다 */
+#mspan{background:var(--card);border:1.5px solid var(--line);padding:4px;gap:4px}
 #mspan button{font-size:15.5px;font-weight:700;padding:9px 18px}
+#mspan button:not([aria-pressed="true"]){border:1.5px solid var(--line);background:var(--card2)}
 #mspan button[aria-pressed="true"]{font-weight:800}
+#mspan button:not([aria-pressed="true"]):hover{border-color:var(--acc-2);background:var(--card)}
 .mtog.mtblt{display:flex;width:100%;justify-content:center;margin-top:9px}
 /* '전체'(2022~) 상세 그래프 — 카드가 한 줄 전체 폭을 쓰고, 선을 굵게,
    연도 경계선·라벨을 더한다 — 요청 2026-09-16, 5차 */
 .mgrid.full{grid-template-columns:1fr!important}
 .mcard.full{padding:18px 20px 16px}
+/* 카드가 한 줄 전체 폭을 쓰다 보니 당월평균/전월평균 쪽(1fr)과 전월대비/전일대비
+   쪽(auto) 사이가 카드 폭만큼 벌어져 버렸다 — 두 쌍을 왼쪽에 붙여 묶는다
+   (내용 폭만큼만 차지, 나머지는 빈 공간으로 남긴다) — 요청 2026-09-16, 7차 */
+.mcard.full .mg{grid-template-columns:auto auto;justify-content:start;
+  column-gap:36px;row-gap:6px}
+.mcard.full .mg .mr{justify-content:flex-start}
 .mchart.mchart-detail{padding-top:14px}
 .mchart.mchart-detail .tln{stroke-width:2.6}
 .mgy{stroke:var(--line2);stroke-width:1;stroke-dasharray:3 3}
@@ -3130,7 +3141,7 @@ header{padding-bottom:12px!important}
    <div class="seg tseg" id="mspan" role="group" aria-label="카드 그래프 기간 선택">
     <button data-s="m" aria-pressed="true">12개월</button>
     <button data-s="y" aria-pressed="false">5개년</button>
-    <button data-s="f" aria-pressed="false" title="2022년 1월부터 전체 월별 이력">전체</button>
+    <button data-s="f" aria-pressed="false" title="2022년 1월부터 전체 월별 이력">전체이력</button>
    </div>
   </div>
   <div id="market"></div>
@@ -4573,7 +4584,14 @@ function mktChart(c){
 function mktChartDetail(c){
   var s = c.series, n = s.length;
   if(!s || n < 2) return "";
-  var W = 900, H = 340, L = 36, R = 36, T = 46, B = 40;
+  /* 모바일은 카드가 좁아서(12개월/5개년과 같은 폭) 데스크톱용 900 폭 그대로
+     쓰면 같은 .tpk 글자가 훨씬 작게 그려진다(뷰박스 단위당 실제 픽셀이 줄어듦).
+     가로 폭을 미니 그래프(320)와 맞춰 글자 크기를 그대로 맞추고, 세로만 키워
+     '상세' 느낌은 유지한다 — 요청 2026-09-16, 7차 */
+  var MOBILE = (typeof window !== "undefined" && window.innerWidth <= 699);
+  var W = MOBILE ? 320 : 900, H = MOBILE ? 420 : 340,
+      L = MOBILE ? 10  : 36,  R = MOBILE ? 10  : 36,
+      T = MOBILE ? 42  : 46,  B = MOBILE ? 38  : 40;
   var vs = s.map(function(p){ return p.v; });
   var mn = Math.min.apply(null, vs), mx = Math.max.apply(null, vs);
   var pad = (mx - mn) * 0.14 || 1;
