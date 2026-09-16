@@ -157,6 +157,10 @@ h1{font-size:27px;font-weight:800;letter-spacing:-.02em}
 .ili[aria-current="true"] .iv{color:var(--acc)}
 .iv{font-family:"Gothic A1",sans-serif;font-weight:800;font-size:13.5px;color:var(--ink);white-space:nowrap}
 .im{font-size:11.5px;color:var(--mute);flex:1}
+.ilipdf{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;color:var(--ci-or);text-decoration:none;flex-shrink:0}
+.ilipdf:hover{background:var(--card2)}
+.ilipdf:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.ilipdf .pi{font-size:13px;line-height:1}
 .isect{font-family:"Gothic A1",sans-serif;font-weight:800;font-size:12px;letter-spacing:.08em;
  color:var(--acc);display:flex;align-items:center;gap:9px;margin:22px 0 12px}
 .isect:first-of-type{margin-top:0}
@@ -1209,7 +1213,7 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
 /* 왼쪽 칸이 280px 이라 'Vol. 2026-35 8월 4주차 / 08.24(월) · 3건' 이 두 줄로 꺾였다 */
 .arch{grid-template-columns:372px minmax(0,1fr)!important;gap:24px!important}
 @media (max-width:1100px){ .arch{grid-template-columns:1fr!important} }
-.ili{display:grid!important;grid-template-columns:auto 1fr;align-items:baseline;
+.ili{display:grid!important;grid-template-columns:auto 1fr auto;align-items:baseline;
   gap:12px!important;padding:14px 16px!important}
 .ili .iv,.ili .im{white-space:nowrap!important}
 .ili .im{text-align:right;font-size:14px!important}
@@ -4682,13 +4686,34 @@ function irail(){
     + " (기사가 확인되지 않은 주는 호가 없습니다)";
   document.getElementById("ilist").innerHTML = ISSUES.map(function(i,n){
     var c = i.items.filter(ihit).length;
-    return '<button class="ili" aria-current="'+(n===icur)+'" data-n="'+n+'">'
+    return '<div class="ili" role="button" tabindex="0" aria-current="'+(n===icur)+'" data-n="'+n+'">'
       + '<span class="iv">Vol. '+i.vol+'<em>'+wkLabel(i.start)+'</em></span>'
       + '<span class="im num">'+fd(i.start)+' · '
-      + (q ? c+"/"+i.items.length : i.items.length+"건")+'</span></button>';
+      + (q ? c+"/"+i.items.length : i.items.length+"건")+'</span>'
+      + (i.pdf ? '<a class="ilipdf" href="'+esc(i.pdf)+'" download="'+esc(i.pdf.split("/").pop())
+          +'" rel="noopener" aria-label="Vol. '+i.vol+' PDF 내려받기" title="PDF 내려받기">'
+          + '<span class="pi" aria-hidden="true">↓</span></a>' : '') + '</div>';
   }).join("");
   Array.prototype.forEach.call(document.querySelectorAll(".ili"), function(b){
-    b.onclick = function(){ icur = +b.dataset.n; irail(); ipane(); };
+    var go = function(){ icur = +b.dataset.n; irail(); ipane(); };
+    b.onclick = function(e){ if(e.target.closest(".ilipdf")) return; go(); };
+    b.onkeydown = function(e){
+      if(e.target.closest(".ilipdf")) return;
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); }
+    };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".ilipdf"), function(a){
+    a.onclick = function(e){
+      e.preventDefault(); e.stopPropagation();
+      var url = a.getAttribute("href"), nm = a.getAttribute("download");
+      var save = function(){
+        var t = document.createElement("a"); t.href = url; t.download = nm;
+        document.body.appendChild(t); t.click(); t.remove();
+      };
+      if(location.protocol === "file:"){ window.open(url, "_blank"); return; }
+      fetch(url, {method: "HEAD"}).then(function(r){ if(r.ok){ save(); } else { window.open(url, "_blank"); } })
+        ["catch"](function(){ save(); });
+    };
   });
 }
 function icard(it){
@@ -4768,7 +4793,6 @@ function ipane(){
   var h = '<div class="dhead"><h2>Vol. '+i.vol+'</h2>'
     + '<span class="chip">'+wkLabel(i.start)+'</span>'
     + '<span class="chip num">'+fd(i.start)+' ~ '+fd(i.end)+'</span>'
-    + '<span class="chip num">발송 '+(sSoc.length + sGrw.length)+'건</span>'
     + (i.pdf ? '<span class="spacer"></span><a class="pdfb" id="pdfb" href="'+esc(i.pdf)+'"'
         /* download 이름은 파일 이름을 그대로 쓴다. 한글 이름을 넣으면 크로미움이
            이름을 버리고 'download' 로 저장하는 경우가 있어 파일명을 아스키로 둔다 */
@@ -4804,7 +4828,7 @@ function ipane(){
     var rs = rest.filter(isSoc), rg = rest.filter(function(x){ return !isSoc(x) && eligible(x); });
     var ri = rest.filter(function(x){ return !isSoc(x) && !eligible(x); });
     h += '<button class="ttog rtog" id="rtog" aria-expanded="false" aria-controls="rwrap">'
-      + '<span class="cv" aria-hidden="true">›</span>그 주 확인분 '+rest.length+'건 더 보기</button>'
+      + '<span class="cv" aria-hidden="true">›</span>이번 주 그 외 소식 '+rest.length+'건 더 보기</button>'
       + '<div id="rwrap" hidden>'
       + (rs.length ? '<div class="isect so">주간 동행</div>' + rs.map(icard).join("") : '')
       + (rg.length ? '<div class="isect gr">주간 성장</div>' + rg.map(icard).join("") : '')
