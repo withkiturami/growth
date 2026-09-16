@@ -4928,39 +4928,48 @@ $("#foot").innerHTML =
   intro.insertBefore(c, intro.firstChild);
 })();
 
-/* ══ 관리자 전용 조회수 카운터 (2026-09-16 추가) ══
-   - CounterAPI.dev 무료 서비스 사용 (워크스페이스는 직접 만들어서 아래 WS 값만 바꿔주세요)
-   - 카운터를 "public"으로 만들면 API 키 없이 브라우저에서 바로 up/get 호출 가능
-   - 응답 필드명(up_count 등)은 실제 워크스페이스로 한번 테스트해서 맞는지 꼭 확인해주세요 */
+/* ══ 관리자 전용 조회수 카운터 (2026-09-16 추가, 2026-09-16 실제 슬러그로 확정) ══
+   - CounterAPI.dev 무료 서비스 사용, 워크스페이스 "임진우's Workspace"(Public) 아래 카운터 2개
+   - 워크스페이스가 Public이라 API 키 없이 브라우저에서 바로 up/get 호출 가능
+   - 응답 필드명은 up_count/count/value 순으로 있는 것을 사용 (실제 응답 확인 전까지는 추정치) */
 (function(){
-  var WS = "REPLACE_WITH_YOUR_WORKSPACE"; // ← counterapi.dev에서 만든 워크스페이스 이름으로 교체
-  if(WS === "REPLACE_WITH_YOUR_WORKSPACE") return; // 아직 설정 전이면 아무 것도 안 함
-  var BASE = "https://api.counterapi.dev/v2/" + WS + "/";
+  var WORKSPACE = "s-team-55-5544";
+  var SLUG_TOTAL = "first-counter-5544";   // 총 조회수 (Counter Name: total-views)
+  var SLUG_UNIQUE = "unique-visitor";      // 고유 방문자
+  var BASE = "https://api.counterapi.dev/v2/" + WORKSPACE + "/";
 
-  function hit(name){
-    return fetch(BASE + name + "/up").then(function(r){ return r.json(); }).catch(function(){ return null; });
+  function hit(slug){
+    return fetch(BASE + slug + "/up").then(function(r){ return r.json(); }).catch(function(){ return null; });
   }
-  function get(name){
-    return fetch(BASE + name + "/").then(function(r){ return r.json(); }).catch(function(){ return null; });
+  function get(slug){
+    return fetch(BASE + slug + "/").then(function(r){ return r.json(); }).catch(function(){ return null; });
+  }
+  function readCount(res){
+    var d = res && res.data;
+    if(!d) return "-";
+    if(d.up_count != null) return d.up_count;
+    if(d.count != null) return d.count;
+    if(d.value != null) return d.value;
+    return "-";
   }
 
   /* 총 조회수 : 매 로드마다 +1 */
-  hit("total-views");
+  hit(SLUG_TOTAL);
 
   /* 고유 방문자 : 이 브라우저에서 처음 방문일 때만 +1 */
   var UKEY = "kt_growth_uid_v1";
   try {
     if(!localStorage.getItem(UKEY)){
       localStorage.setItem(UKEY, "1");
-      hit("unique-visitors");
+      hit(SLUG_UNIQUE);
     }
   } catch(e){}
 
   /* 관리자 전용 표시 : ?admin=1 로 접속했을 때만 우측 하단에 보여준다 */
   if(/[?&]admin=1(&|$)/.test(location.search)){
-    Promise.all([get("total-views"), get("unique-visitors")]).then(function(res){
-      var t = (res[0] && res[0].data && res[0].data.up_count != null) ? res[0].data.up_count : "-";
-      var u = (res[1] && res[1].data && res[1].data.up_count != null) ? res[1].data.up_count : "-";
+    Promise.all([get(SLUG_TOTAL), get(SLUG_UNIQUE)]).then(function(res){
+      var t = readCount(res[0]);
+      var u = readCount(res[1]);
       var box = document.createElement("div");
       box.style.cssText = "position:fixed;bottom:14px;right:14px;z-index:9999;background:#111;color:#fff;"
         + "font:12px/1.5 -apple-system,'Malgun Gothic',sans-serif;padding:10px 14px;border-radius:10px;opacity:.92";
