@@ -467,6 +467,7 @@ table.ov tr.miss td{color:var(--mute)}
   font-variant-numeric:tabular-nums;white-space:nowrap}
 .tsub{font-size:12.5px;font-weight:600;color:var(--mute);margin:-3px 0 3px;
   font-variant-numeric:tabular-nums}
+.tsub b{color:var(--ink);font-weight:800}
 .tpk{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;
   paint-order:stroke;stroke:var(--card2);stroke-width:4.2;stroke-linejoin:round}
 .tpk.up{fill:var(--ink)} .tpk.dn{fill:var(--mute)}
@@ -4313,6 +4314,9 @@ function trendInto(cs, host){
     var ym = function(i){ var y = s[i].ym;
       return YR ? y.slice(2) + "년" : y.slice(2).replace("-", "."); };
     var AVG = YR ? " 연평균" : " 월평균";
+    /* 당월평균 · 전월평균 표기 (연평균 화면에서는 올해·작년으로) — 요청 2026-09-16 */
+    var CUR_LBL = YR ? "올해평균" : "당월평균";
+    var PREV_LBL = YR ? "작년평균" : "전월평균";
     /* 진행 중인 해는 몇 월까지의 평균인지 밝힌다 (26년 = 1~8월) */
     var part = function(i){ var p = s[i];
       return (YR && p.n && p.n < 12) ? " (1~" + p.n + "월)" : ""; };
@@ -4346,16 +4350,32 @@ function trendInto(cs, host){
       + (function(){
           var hit2 = findIt(c.nm);
           if(!hit2 || hit2[0].daily == null)
-            return '<div class="tnow"><b>'+fc(s[n-1].v)+'</b><em>'+ym(n-1)+AVG+part(n-1)+'</em></div>';
+            return '<div class="tnow"><b>'+fc(s[n-1].v)+'</b><em>'+CUR_LBL+' · '+ym(n-1)+part(n-1)+'</em></div>'
+              + (n >= 2 ? '<div class="tsub">'+PREV_LBL+' <b>'+fc(s[n-2].v)+'</b>'+part(n-2)+' ('+ym(n-2)+')</div>' : '');
           var r2 = hit2[0];
           /* 값이 가진 자리수를 그대로 쓴다 : 달러 1,337.90 → ₩1,337.9 ·
              유로 1,556.98 → ₩1,556.98 · 구리 14672 → $14,672 */
           var dd = NDEC(r2.daily, r2.dec, r2.unit);
           var dv = sym + r2.daily.toLocaleString("ko-KR",
             {minimumFractionDigits: dd, maximumFractionDigits: dd});
+          /* 당월평균·전월평균 : 그래프 점(완결월)이 아니라 실제 이번 달(진행 중,
+             영업일이 며칠 안 되도 그대로)·지난달 평균을 쓴다 — 요청 2026-09-16.
+             연평균(5개년) 화면은 '달' 개념이 없어 기존처럼 그래프 점을 쓴다 */
+          var curTxt, prevTxt;
+          if(!YR && r2.month != null && r2.prev != null){
+            var fR = function(v){ var d3 = NDEC(v, r2.dec, r2.unit);
+              return sym + v.toLocaleString("ko-KR", {minimumFractionDigits: d3, maximumFractionDigits: d3}); };
+            var ymShort = function(y){ return y.slice(2).replace("-", "."); };
+            curTxt  = CUR_LBL +' <b>'+fR(r2.month)+'</b> ('+ymShort(r2.ym)+')';
+            prevTxt = PREV_LBL+' <b>'+fR(r2.prev)+'</b> ('+ymShort(r2.prevYm)+')';
+          } else {
+            curTxt  = CUR_LBL +' <b>'+fc(s[n-1].v)+'</b>'+part(n-1)+' ('+ym(n-1)+')';
+            prevTxt = (n >= 2) ? PREV_LBL+' <b>'+fc(s[n-2].v)+'</b>'+part(n-2)+' ('+ym(n-2)+')' : '';
+          }
           return '<div class="tnow"><b>'+dv+'</b><em>'
             + r2.date.slice(5).replace("-", ".")+' '+hit2[1]+'</em></div>'
-            + '<div class="tsub">'+ym(n-1)+AVG+part(n-1)+' '+fc(s[n-1].v)+'</div>';
+            + '<div class="tsub">'+curTxt+'</div>'
+            + (prevTxt ? '<div class="tsub">'+prevTxt+'</div>' : '');
         })()
       + '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(c.nm)
       + ' 최근 '+n+(YR ? '개년' : '개월')+' 추이. '+ym(0)+' '+fc(s[0].v)+' → '+ym(n-1)+' '+fc(s[n-1].v)+'">'
@@ -4908,11 +4928,25 @@ document.getElementById("q").oninput = function(e){
   irail(); ipane();
 };
 
+/* 화면(빌드) 확인 배지 : 예전에는 mk.py 가 찍어 주는 문자열을 손으로 그대로
+   옮겨 적었는데, 직접 손을 댄 뒤 깜빡하면 배지만 옛날 시각에 멈춰 있었다
+   (2026-09-16). document.lastModified 는 이 파일을 올릴 때(깃허브 커밋/배포)
+   브라우저가 서버 응답에서 읽어오는 진짜 수정 시각이라 손으로 관리할 필요가
+   없다 — 파일을 새로 올리기만 하면 배지도 저절로 맞다 */
+var _buildTxt = (function(){
+  try{
+    var d = new Date(document.lastModified);
+    if(isNaN(d.getTime())) return "";
+    var p2 = function(n){ return (n < 10 ? "0" : "") + n; };
+    return "화면 " + p2(d.getMonth() + 1) + "-" + p2(d.getDate())
+      + " " + p2(d.getHours()) + ":" + p2(d.getMinutes());
+  }catch(e){ return ""; }
+})();
 $("#foot").innerHTML =
   "장학금 전달 기록은 언론 보도로 확인된 건만 담았고, 금액·인원은 보도된 숫자를 그대로 옮겼습니다. "
   + "협약(MOU)만 체결된 곳의 기금은 전달 금액 합계에 넣지 않았습니다. "
   + "지도 경계 @svg-maps/south-korea (CC BY 4.0) "
-  + '<span class="ver">화면 09-15 09:52</span>';
+  + (_buildTxt ? '<span class="ver">'+_buildTxt+'</span>' : '');
 
 /* ── 모바일 : 지도 배율(1·2·3배) + 전달 기록으로 이동 ─────────────
    폰에서는 지도의 가로폭이 화면폭에 묶여 '크게'를 눌러도 커지지 않는다.
