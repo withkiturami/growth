@@ -1364,6 +1364,33 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
 }
 @media (max-width:520px){ .mhead .mnote{display:none} }
 
+/* ══════════════════════════════════════════════════════════════
+   지도 전체화면 머리줄 : 다른 겹침창(원자재 · 환율 변동, #tmodal)과
+   같은 수준으로 — 지금까지는 진한 덮개 위에 흰 글씨만 놓인 맨 얼굴이라
+   휑해 보였다. #tmodal 처럼 판을 깔고 왼쪽에 색 띠를 세우고, 제목을
+   굵고 크게, 부제(mnote)도 늘 보이게 한다. 폭이 좁으면 제목을 한 줄
+   통째로 쓰고 그 아래 부제 · 배율 · 닫기를 두 번째 줄로 내린다.
+   (넓은 화면(≥1001px)은 "머리줄을 걷어 지도에 높이를 준다" 는 별도
+   의도된 디자인이 있어 그대로 두고, 이 판은 ≤1000px 에서만 켠다)
+   — 요청 2026-09-16, 9차 */
+@media (max-width:1000px){
+  #modal .mhead{flex-wrap:wrap!important;row-gap:6px!important;
+    padding:12px 14px 12px 18px!important;margin-bottom:10px!important;
+    background:linear-gradient(90deg,rgba(3,20,38,.94) 0%,rgba(3,20,38,.90) 62%,
+      rgba(3,20,38,.88) 100%)!important;
+    border:1px solid rgba(255,255,255,.16)!important;border-radius:14px!important;
+    box-shadow:0 6px 22px rgba(0,0,0,.34)!important;
+    position:relative!important;overflow:hidden!important}
+  #modal .mhead::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+    background:linear-gradient(180deg,#54AAEA 0%,#0F6FBE 100%)}
+  #modal .mhead b{flex:1 1 100%!important;font-size:19px!important;font-weight:800!important;
+    letter-spacing:-.01em!important;text-shadow:0 1px 10px rgba(0,0,0,.45)}
+  #modal .mhead .mnote{display:block!important;flex:1 1 auto!important;
+    font-size:12.5px!important;opacity:.85!important;white-space:normal!important}
+  #modal .mhead .spacer{display:none!important}
+  #modal .mzoom{margin-left:auto!important}
+}
+
 /* ══ 시세 카드 : 밑줄 문구를 걷어낸 자리를 글씨로 (2026-09-08) ══
    '09.07 종가 · 당월 5영업일 · 전일 09.04' 는 앞부분이 큰 숫자 옆과 중복이고
    나머지는 카드 툴팁·아래 안내 문구가 맡는다.
@@ -1470,12 +1497,15 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
   .mkt .mgroup{font-size:17px!important;margin:22px 0 10px!important}
 }
 
-/* ══ 시세 기준일을 제목 줄 오른쪽 끝으로 (2026-09-08) ══════════
-   제목 → 얇은 선 → 기준일 순서로 놓는다.
-   ::after(선) 는 항상 마지막 항목이므로 order 로 자리를 바꾼다 */
-.mkt .ptitle{flex-wrap:wrap;row-gap:8px}
-.mkt .ptitle::after{order:1;flex:1 1 40px!important}
-.mkt .asof{order:2;flex:0 0 auto;font-family:"Gothic A1",sans-serif;
+/* ══ 시세 기준일 알약 (2026-09-08 신설 · 2026-09-16 위치 수정) ══
+   처음엔 .ptitle 혼자 행 전체를 썼던 때라 제목 뒤로 늘어나는 선의
+   끝에 알약을 붙이는 order 트릭으로 '제목 줄 오른쪽 끝'을 흉내냈다.
+   그 뒤 같은 행에 12개월/5개년/전체이력 토글이 들어오면서 .ptitle 상자
+   자체가 좁아져, 그 안에서 늘어나던 선+알약이 못 들어가고 아래 줄
+   왼쪽으로 떨어졌다. → .ptitle 안에 두지 않고 .bars 행에서 스페이서와
+   토글 사이의 제 자리로 옮긴다(마크업 참고) — 이제 제목 폭과 무관하게
+   토글 바로 왼쪽에 늘 붙는다 */
+.mkt .asof{font-family:"Gothic A1",sans-serif;
   font-size:14px;font-weight:700;letter-spacing:0;color:var(--mkt);
   background:var(--mkt-bg);border:1px solid var(--mkt-ln);
   border-radius:999px;padding:5px 13px;white-space:nowrap;
@@ -1490,9 +1520,13 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
 
 /* 시세 제목 줄 : 모바일에서 기준일 알약이 아래로 내려가며 막대가 어긋난 것 */
 .mkt .ptitle::before{top:.1em!important;transform:none!important}
-@media (max-width:560px){
-  .mkt .ptitle::after{display:none!important}
-  .mkt .asof{margin-left:auto}
+/* 알약이 .ptitle 밖으로 나갔으므로(위 참고) 이 안에서 선을 숨기고
+   margin-left:auto 로 밀어내던 옛 규칙은 더 필요 없다 — 2026-09-16 */
+@media (max-width:700px){
+  /* 폭이 좁으면 제목이 한 줄을 통째로 쓰고, 기준일·토글은 다음 줄에서
+     함께 오른쪽으로 몰린다(스페이서가 앞에서 밀어준다) */
+  .mkt .bars{row-gap:8px}
+  .mkt .ptitle{flex:1 1 100%}
 }
 
 /* ══ 주간 동행 / 주간 성장 : 글씨 확대 (2026-09-08) ══════════
@@ -2330,15 +2364,20 @@ body.mopen #mleft svg.kmap{max-height:none!important}
   .panel.mapbox{position:relative}
   .mapbox>.bars.mrow{margin-bottom:0!important}
   .mapbox>.bars.mrow .spacer{display:none!important}
-  .mapbox>.bars.mrow .mtog{position:absolute!important;top:16px;z-index:3;
+  /* 전체화면(모달)에서는 이 절대배치가 적용되면 안 된다 — 모달 안에서는
+     같은 .mapbox 트리를 그대로 옮겨와 재사용하는데, 거기선 이 위치가 곧
+     창 머리(1배/2배/3배)라 서로 겹친다. 같은 종류의 다른 폭(1220px↑,
+     701~1219px) 규칙은 이미 body:not(.mopen) 로 걸러져 있었는데 이 700px
+     규칙만 빠져 있었다 — 요청 2026-09-16, 9차 */
+  body:not(.mopen) .mapbox>.bars.mrow .mtog{position:absolute!important;top:16px;z-index:3;
     margin:0!important;white-space:nowrap!important;
     font-size:12.5px!important;padding:6px 10px!important}
   .mapbox>.bars:not(.mrow){align-items:center!important}
   .mapbox #monwrap{margin-top:6px!important}
 }
 /* '⤢ 크게' 단추 폭이 화면에 따라 달라 토글 위치를 두 단으로 잡는다 */
-@media (max-width:700px){ .mapbox>.bars.mrow .mtog{right:84px} }
-@media (max-width:400px){ .mapbox>.bars.mrow .mtog{right:78px} }
+@media (max-width:700px){ body:not(.mopen) .mapbox>.bars.mrow .mtog{right:84px} }
+@media (max-width:400px){ body:not(.mopen) .mapbox>.bars.mrow .mtog{right:78px} }
 
 /* ══════════════════════════════════════════════════════════════
    지도 조작 칸 손질                                    2026-09-10
@@ -2373,16 +2412,22 @@ body.mopen #mleft svg.kmap{max-height:none!important}
     outline-offset:3px!important}
 }
 /* 어두운 화면 : --acc 가 밝은 파랑(#77ACEE)이라 흰 글씨는 대비가 모자란다
-   (실측 2.0:1) → 글씨를 짙게 바꾼다 (대비 9.5:1) */
-:root[data-theme="dark"] body.mopen #modal .mclose,
-:root[data-theme="dark"] body.mopen #modal .mclose:hover{
-  color:#0A1422!important;
-  box-shadow:0 0 0 3px rgba(23,31,45,.92), 0 3px 12px rgba(0,0,0,.55)!important}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]) body.mopen #modal .mclose,
-  :root:not([data-theme="light"]) body.mopen #modal .mclose:hover{
+   (실측 2.0:1) → 글씨를 짙게 바꾼다 (대비 9.5:1)
+   ※ 이 짙은 글씨는 위 블록의 '채운 파랑 단추'(데스크톱, ≥1001px) 전용이다.
+   가드 없이 걸려 있어 모바일(≤1000px, 배경 투명 + 기본 흰 글씨)에서도
+   적용되는 바람에 짙은 남색 글씨가 짙은 창 배경 위에서 안 보였다
+   — 요청 2026-09-16, 9차(진행 중 발견) */
+@media (min-width:1001px){
+  :root[data-theme="dark"] body.mopen #modal .mclose,
+  :root[data-theme="dark"] body.mopen #modal .mclose:hover{
     color:#0A1422!important;
     box-shadow:0 0 0 3px rgba(23,31,45,.92), 0 3px 12px rgba(0,0,0,.55)!important}
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]) body.mopen #modal .mclose,
+    :root:not([data-theme="light"]) body.mopen #modal .mclose:hover{
+      color:#0A1422!important;
+      box-shadow:0 0 0 3px rgba(23,31,45,.92), 0 3px 12px rgba(0,0,0,.55)!important}
+  }
 }
 
 
@@ -3150,8 +3195,9 @@ header{padding-bottom:12px!important}
 <div role="tabpanel" id="p-mkt" aria-labelledby="t-mkt" hidden>
 <div class="panel mkt" style="margin-top:0">
   <div class="bars">
-   <div class="ptitle">원자재 · 환율 시세<span class="asof" id="mktasof"></span></div>
+   <div class="ptitle">원자재 · 환율 시세</div>
    <span class="spacer"></span>
+   <span class="asof" id="mktasof"></span>
    <div class="seg tseg" id="mspan" role="group" aria-label="카드 그래프 기간 선택">
     <button data-s="m" aria-pressed="true">12개월</button>
     <button data-s="y" aria-pressed="false">5개년</button>
