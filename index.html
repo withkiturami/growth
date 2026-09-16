@@ -241,7 +241,8 @@ table.ov tr.miss td{color:var(--mute)}
 
 .mkt{margin-top:22px}
 .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px}
-.mcard{border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:var(--card2)}
+.mcard{border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:var(--card2);
+  box-shadow:var(--shadow)}
 .mcard .t{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
 .mcard .n{font-size:12.5px;font-weight:600;color:var(--ink)}
 .mcard .u{font-size:10.5px;color:var(--mute)}
@@ -1904,6 +1905,19 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
 :root[data-theme="dark"] .mkt .mgroup::after{background:#1E2E42!important}
 :root[data-theme="dark"] .mkt .asof{background:#12222F!important;border-color:#24384F!important}
 :root[data-theme="dark"] .mcard .mg{border-top-color:#1E2E42!important}
+
+/* ⑤ .mcard 테두리 재도입 — 위 "계열색 ①"에서 .tf,.mcard 를 border:0!important 로
+   통일했는데, .tf(상단 상시 그래프 1장)는 그림자만으로 충분해도 .mcard(12장이
+   촘촘한 격자)는 카드 사이 경계가 뚜렷해야 나이 있는 사용자도 한눈에 구분된다.
+   그림자만 짙게 하는 것보다 확실한 색 테두리 + 더 짙은 2단 그림자를 함께 쓴다
+   — 요청 2026-09-16, 8차 */
+.mcard{border:1.5px solid #A6C1E4!important;
+  box-shadow:0 2px 6px rgba(18,60,122,.18),0 14px 32px rgba(18,60,122,.20)!important}
+:root[data-theme="dark"] .mcard{border-color:#3E5878!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.58),0 14px 34px rgba(0,0,0,.5)!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mcard{
+  border-color:#3E5878!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.58),0 14px 34px rgba(0,0,0,.5)!important}}
 
 /* ══ 주간 동행 / 주간 성장 : 그라데이션을 양쪽 다 (2026-09-09) ══
    원인은 의도가 아니라 덮임이었다.
