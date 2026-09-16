@@ -5315,21 +5315,35 @@ $("#foot").innerHTML =
   intro.insertBefore(c, intro.firstChild);
 })();
 
-/* ══ 관리자 전용 조회수 카운터 (2026-09-16 추가, 2026-09-16 실제 슬러그로 확정) ══
+/* ══ 관리자 전용 조회수 카운터 (2026-09-16 추가, 2026-09-16 실제 슬러그로 확정,
+   2026-09-16 캐시 우회 수정) ══
    - CounterAPI.dev 무료 서비스 사용, 워크스페이스 "임진우's Workspace"(Public) 아래 카운터 2개
    - 워크스페이스가 Public이라 API 키 없이 브라우저에서 바로 up/get 호출 가능
-   - 응답 필드명은 up_count/count/value 순으로 있는 것을 사용 (실제 응답 확인 전까지는 추정치) */
+   - 응답 필드명은 up_count/count/value 순으로 있는 것을 사용 (실제 응답 확인 전까지는 추정치)
+   - 새로고침/재방문해도 안 올라간다는 문제 확인 — 원인은 API 가 아니라 브라우저 캐시였다.
+     매번 정확히 같은 URL(.../up, .../{slug})로 fetch 하다 보니, 서버가 캐시 금지 헤더를
+     안 주는 경우 브라우저가 실제 요청을 보내지 않고 이전 응답을 그대로 재사용해서
+     같은 URL을 여러 번 호출해도 실제로는 한 번만 서버에 도달했다(주소창에 직접
+     쳐서 여러 번 열어도 1번만 오른 현상과 일치). → 매 호출마다 캐시버스터
+     쿼리(_=시각+난수)를 붙이고 fetch 에 cache:"no-store" 도 같이 줘서 항상 진짜
+     네트워크 요청이 나가게 한다 — 요청 2026-09-16, 12차 */
 (function(){
   var WORKSPACE = "s-team-55-5544";
   var SLUG_TOTAL = "first-counter-5544";   // 총 조회수 (Counter Name: total-views)
   var SLUG_UNIQUE = "unique-visitor";      // 고유 방문자
   var BASE = "https://api.counterapi.dev/v2/" + WORKSPACE + "/";
 
+  function noCache(url){
+    return url + (url.indexOf("?") >= 0 ? "&" : "?") + "_=" + Date.now()
+      + Math.random().toString(36).slice(2);
+  }
   function hit(slug){
-    return fetch(BASE + slug + "/up").then(function(r){ return r.json(); }).catch(function(){ return null; });
+    return fetch(noCache(BASE + slug + "/up"), { cache: "no-store" })
+      .then(function(r){ return r.json(); }).catch(function(){ return null; });
   }
   function get(slug){
-    return fetch(BASE + slug + "/").then(function(r){ return r.json(); }).catch(function(){ return null; });
+    return fetch(noCache(BASE + slug + "/"), { cache: "no-store" })
+      .then(function(r){ return r.json(); }).catch(function(){ return null; });
   }
   function readCount(res){
     var d = res && res.data;
