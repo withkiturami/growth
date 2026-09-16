@@ -157,10 +157,10 @@ h1{font-size:27px;font-weight:800;letter-spacing:-.02em}
 .ili[aria-current="true"] .iv{color:var(--acc)}
 .iv{font-family:"Gothic A1",sans-serif;font-weight:800;font-size:13.5px;color:var(--ink);white-space:nowrap}
 .im{font-size:11.5px;color:var(--mute);flex:1}
-.ilipdf{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;color:var(--ci-or);text-decoration:none;flex-shrink:0}
-.ilipdf:hover{background:var(--card2)}
-.ilipdf:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
-.ilipdf .pi{font-size:13px;line-height:1}
+.ilipdf{display:inline-flex;align-items:center;gap:6px;justify-content:center;margin-left:auto;flex-shrink:0;background:var(--ci-or);color:#fff;text-decoration:none;border-radius:8px;padding:8px 16px;font-size:13.5px;font-weight:800;letter-spacing:-.01em;box-shadow:0 2px 8px rgba(232,119,34,.25)}
+.ilipdf:hover{background:#C2560E;color:#fff}
+.ilipdf:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.ilipdf .pi{font-size:14px;line-height:1}
 .isect{font-family:"Gothic A1",sans-serif;font-weight:800;font-size:12px;letter-spacing:.08em;
  color:var(--acc);display:flex;align-items:center;gap:9px;margin:22px 0 12px}
 .isect:first-of-type{margin-top:0}
@@ -1213,7 +1213,7 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
 /* 왼쪽 칸이 280px 이라 'Vol. 2026-35 8월 4주차 / 08.24(월) · 3건' 이 두 줄로 꺾였다 */
 .arch{grid-template-columns:372px minmax(0,1fr)!important;gap:24px!important}
 @media (max-width:1100px){ .arch{grid-template-columns:1fr!important} }
-.ili{display:grid!important;grid-template-columns:auto 1fr auto;align-items:baseline;
+.ili{display:grid!important;grid-template-columns:auto 1fr;align-items:baseline;
   gap:12px!important;padding:14px 16px!important}
 .ili .iv,.ili .im{white-space:nowrap!important}
 .ili .im{text-align:right;font-size:14px!important}
@@ -4688,11 +4688,13 @@ function irail(){
     var c = i.items.filter(ihit).length;
     return '<div class="ili" role="button" tabindex="0" aria-current="'+(n===icur)+'" data-n="'+n+'">'
       + '<span class="iv">Vol. '+i.vol+'<em>'+wkLabel(i.start)+'</em></span>'
-      + '<span class="im num">'+fd(i.start)+' · '
-      + (q ? c+"/"+i.items.length : i.items.length+"건")+'</span>'
-      + (i.pdf ? '<a class="ilipdf" href="'+esc(i.pdf)+'" download="'+esc(i.pdf.split("/").pop())
-          +'" rel="noopener" aria-label="Vol. '+i.vol+' PDF 내려받기" title="PDF 내려받기">'
-          + '<span class="pi" aria-hidden="true">↓</span></a>' : '') + '</div>';
+      + (i.pdf
+          ? '<a class="ilipdf" href="'+esc(i.pdf)+'" download="'+esc(i.pdf.split("/").pop())
+              +'" rel="noopener" aria-label="Vol. '+i.vol+' 발송본 PDF 내려받기">'
+              + '<span class="pi" aria-hidden="true">↓</span>PDF 내려받기</a>'
+          : '<span class="im num">'+fd(i.start)+' · '
+              + (q ? c+"/"+i.items.length : i.items.length+"건")+'</span>')
+      + '</div>';
   }).join("");
   Array.prototype.forEach.call(document.querySelectorAll(".ili"), function(b){
     var go = function(){ icur = +b.dataset.n; irail(); ipane(); };
