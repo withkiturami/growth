@@ -493,6 +493,25 @@ table.ov tr.miss td{color:var(--mute)}
 .mcard .chg.up{color:var(--up)} .mcard .chg.dn{color:var(--down)}
 .mcard .chg.na{color:var(--mute);font-weight:600}
 .mcard .dt{margin-top:7px;padding-top:6px;border-top:1px solid var(--line2);font-size:10.5px}
+/* 시세 탭 카드 안 미니 그래프 · 월별(연도별) 상세표 — 요청 2026-09-16
+   .tf 클래스를 같이 줘서 손가락·마우스로 짚으면 숫자가 뜨는 trendTouch() 를
+   그대로 재사용한다 (요청 2026-09-16, 2차) — 카드용 크기로만 .tf 기본 박스를 지운다 */
+.mchart.tf{margin:10px 0 2px;padding:9px 0 0;border:0;border-top:1px solid var(--line2);
+  background:transparent}
+.mchart svg{display:block;width:100%;height:auto}
+.mtpk{font-size:10.5px;font-weight:800;font-variant-numeric:tabular-nums;
+  paint-order:stroke;stroke:var(--card2);stroke-width:3;stroke-linejoin:round}
+.mtpk.up{fill:var(--ink)} .mtpk.dn{fill:var(--mute)}
+.mtpc{font-size:9px;font-weight:700;fill:var(--mute)}
+.mtog.mtblt{display:flex;width:100%;justify-content:center;margin-top:9px}
+.mtbl-wrap{margin-top:7px;max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.mtbl-wrap[hidden]{display:none}
+.mtbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.mtbl th,.mtbl td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line2);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.mtbl thead th{position:sticky;top:0;background:var(--card2);color:var(--mute);font-weight:700}
+.mtbl tbody th{text-align:left;font-weight:700;color:var(--body)}
+.mtd.up{color:var(--up)} .mtd.dn{color:var(--down)} .mtd.na{color:var(--mute)}
 
 /* 시세 띠 — 월/일 두 지표 */
 .ti .v{margin-top:1px}
@@ -3095,7 +3114,14 @@ header{padding-bottom:12px!important}
 
 <div role="tabpanel" id="p-mkt" aria-labelledby="t-mkt" hidden>
 <div class="panel mkt" style="margin-top:0">
-  <div class="ptitle">원자재 · 환율 시세<span class="asof" id="mktasof"></span></div>
+  <div class="bars">
+   <div class="ptitle">원자재 · 환율 시세<span class="asof" id="mktasof"></span></div>
+   <span class="spacer"></span>
+   <div class="seg tseg" id="mspan" role="group" aria-label="카드 그래프 기간 선택">
+    <button data-s="m" aria-pressed="true">12개월</button>
+    <button data-s="y" aria-pressed="false">5개년</button>
+   </div>
+  </div>
   <div id="market"></div>
  </div>
 </div>
@@ -4458,6 +4484,94 @@ function trendTouch(root){
   });
 }
 
+/* 시세 탭 안 미니 그래프 · 월별(연도별) 상세표 — 요청 2026-09-16
+   "상단 추이 그래프보다 이 탭이 오히려 정보가 적다" 는 지적을 받아,
+   카드마다 작은 추이 그래프와 펼쳐보는 상세표를 붙인다.
+   숫자 계산은 하나도 새로 안 한다 — MARKET.chartsAll/chartsYear 의 series 를
+   그대로 읽어서 그리고 나열할 뿐이라, 상단 그래프·전체보기 창과 항상 같은 숫자다 */
+var mktSpan = "m";
+
+function mktChart(c){
+  var s = c.series, n = s.length;
+  if(!s || n < 2) return "";
+  var W = 280, H = 124, L = 8, R = 8, T = 24, B = 20;
+  var vs = s.map(function(p){ return p.v; });
+  var mn = Math.min.apply(null, vs), mx = Math.max.apply(null, vs);
+  var pad = (mx - mn) * 0.14 || 1;
+  var lo = mn - pad, hi = mx + pad;
+  var X = function(i){ return L + i * (W - L - R) / (n - 1); };
+  var Y = function(v){ return T + (hi - v) / (hi - lo) * (H - T - B); };
+  var d = s.map(function(p, i){ return (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(p.v).toFixed(1); }).join(" ");
+  var ar = "M" + X(0).toFixed(1) + " " + (H - B) + " " + d.slice(1) + " L" + X(n-1).toFixed(1) + " " + (H - B) + " Z";
+  var sym = CURSYM(c.unit);
+  var f = function(v){ return v.toLocaleString("ko-KR",
+    {minimumFractionDigits: c.dec, maximumFractionDigits: c.dec}); };
+  var fc = function(v){ return sym + f(v); };
+  var YR = (c.span === "year");
+  var ym = function(i){ var y = s[i].ym;
+    return YR ? y.slice(2) + "년" : y.slice(2).replace("-", "."); };
+  var part = function(i){ var p = s[i];
+    return (YR && p.n && p.n < 12) ? " (1~" + p.n + "월)" : ""; };
+  var mark = function(v, i, up){
+    var an = i < 2 ? "start" : (i > n - 3 ? "end" : "middle");
+    var xx = X(i) + (an === "start" ? -3 : (an === "end" ? 3 : 0));
+    var tw = 2 * 13 + 6 + fc(v).length * 20 * 0.62;
+    if(an === "middle") xx = Math.min(Math.max(xx, L + tw / 2), W - R - tw / 2);
+    else if(an === "start") xx = Math.min(xx, W - R - tw);
+    else xx = Math.max(xx, L + tw);
+    return '<text class="mtpk'+(up ? " up" : " dn")+'" x="'+xx.toFixed(1)
+      + '" y="'+(Y(v) + (up ? -7 : 18)).toFixed(1)+'" text-anchor="'+an+'">'
+      + '<tspan class="mtpc">'+(up ? "최고" : "최저")+'</tspan> '+fc(v)+'</text>';
+  };
+  var peak = mark(mx, vs.indexOf(mx), true) + mark(mn, vs.lastIndexOf(mn), false);
+  /* 상단 그래프와 같은 방식(손가락·마우스로 짚으면 숫자가 뜨는)으로 —
+     요청 2026-09-16. trendTouch() 가 이미 하는 일이라 새로 만들지 않고
+     그 함수가 찾는 .hp/.tpick 구조만 그대로 맞춰 준다 */
+  var hit = s.map(function(p, i){
+    var w = (W - L - R) / (n - 1);
+    var lbl = ym(i) + "  " + fc(p.v) + " " + c.unit + part(i);
+    return '<g class="hp" role="img" aria-label="'+esc(lbl)+'" data-t="'+esc(lbl)+'">'
+      + '<rect x="'+(X(i)-w/2).toFixed(1)+'" y="0" width="'+w.toFixed(1)
+      + '" height="'+H+'" fill="transparent"></rect>'
+      + '<line class="ch" x1="'+X(i).toFixed(1)+'" y1="'+T+'" x2="'+X(i).toFixed(1)+'" y2="'+(H-B)+'"></line>'
+      + '<circle class="hd" cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="5"></circle>'
+      + '</g>';
+  }).join("");
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(c.nm)
+    + ' 최근 '+n+(YR ? '개년' : '개월')+' 추이. '+ym(0)+' '+fc(s[0].v)+' → '+ym(n-1)+' '+fc(s[n-1].v)+'">'
+    + '<path class="tar" d="'+ar+'"></path>'
+    + '<line class="tb" x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'"></line>'
+    + '<path class="tln" d="'+d+'"></path>'
+    + '<circle class="te" cx="'+X(n-1).toFixed(1)+'" cy="'+Y(s[n-1].v).toFixed(1)+'" r="4"></circle>'
+    + peak + hit
+    + '<g class="tpick" hidden><rect class="tpb" rx="7"></rect><text class="tpt"></text></g>'
+    + '</svg>'
+    + '<div class="tfoot"><span>'+ym(0)+'</span><span>'+ym(n-1)+'</span></div>';
+}
+
+function mktTable(c){
+  var s = c.series, n = s.length;
+  var YR = (c.span === "year");
+  var sym = CURSYM(c.unit);
+  var f = function(v){ return v.toLocaleString("ko-KR",
+    {minimumFractionDigits: c.dec, maximumFractionDigits: c.dec}); };
+  var ymFull = function(i){ var p = s[i];
+    return YR ? (p.ym.slice(2) + "년" + ((p.n && p.n < 12) ? " (1~"+p.n+"월)" : ""))
+               : p.ym.slice(2).replace("-", "."); };
+  var rows = [];
+  for(var i = n - 1; i >= 0; i--){
+    var chg = (i > 0) ? (s[i].v - s[i-1].v) : null;
+    var pct2 = (i > 0 && s[i-1].v) ? (chg / s[i-1].v * 100) : null;
+    var chip = (pct2 == null) ? '<span class="mtd na">—</span>'
+      : '<span class="mtd '+(pct2 >= 0 ? "up" : "dn")+'">'+(pct2 >= 0 ? "▲" : "▼")
+        + Math.abs(pct2).toFixed(1)+'%</span>';
+    rows.push('<tr><th>'+esc(ymFull(i))+'</th><td>'+sym+f(s[i].v)+'</td><td>'+chip+'</td></tr>');
+  }
+  return '<table class="mtbl"><thead><tr><th>'+(YR ? "연도" : "월")
+    + '</th><th>평균</th><th>전'+(YR ? "년" : "월")+'대비</th></tr></thead><tbody>'
+    + rows.join("") + '</tbody></table>';
+}
+
 function market(){
   var f = function(v, dec, unit){
     if(v == null) return "—";
@@ -4470,6 +4584,10 @@ function market(){
     return '<b class="chg '+(up?'up':'dn')+'">'+(up?"▲":"▼")
       + Math.abs(v).toFixed(2)+'%</b>';
   };
+  var chSrc = (mktSpan === "y") ? (MARKET.chartsYear || [])
+    : (MARKET.chartsAll || MARKET.charts || []);
+  var chMap = {};
+  chSrc.forEach(function(c){ chMap[c.nm] = c; });
   var card = function(r, dlbl){
     var tip = r.nm + ' · ' + r.date.slice(5).replace("-", ".") + ' ' + dlbl
       + ' · 당월 ' + r.days + '영업일'
@@ -4477,6 +4595,7 @@ function market(){
     /* Dubai · Brent · WTI · Naphtha 처럼 로마자만 있는 이름은 x-높이가 낮아
        같은 22px 인데도 한글(구리·아연)보다 작게 보인다 → 클래스로 보정한다 */
     var en = /^[\x20-\x7E]+$/.test(r.nm) ? " en" : "";
+    var c = chMap[r.nm];
     return '<div class="mcard" title="'+esc(tip)+'"><div class="t"><span class="n'+en+'">'+esc(r.nm)+'</span>'
       + '<span class="u">'+esc(r.unit)+'</span></div>'
       + '<div class="v">'+f(r.daily, r.dec, r.unit)
@@ -4487,6 +4606,10 @@ function market(){
       +   '<div class="ml"><span>전월평균</span><b>'+f(r.prev, r.dec, r.unit)+'</b></div>'
       +   '<div class="mr"><span>전일대비</span>'+pct(r.vsDay)+'</div>'
       + '</div>'
+      + (c ? '<div class="mchart tf">'+mktChart(c)+'</div>'
+        + '<button class="mtog mtblt" type="button" aria-expanded="false">'
+        +   '<span class="cv" aria-hidden="true">›</span>'+(c.span === "year" ? "연도별" : "월별")+' 상세 보기</button>'
+        + '<div class="mtbl-wrap" hidden>'+mktTable(c)+'</div>' : '')
       + '</div>'; };
   /* 카드 밑에 있던 '09.07 종가 · 당월 5영업일 · 전일 09.04' 줄은 걷어냈다.
      앞부분은 큰 숫자 옆에 이미 있고(중복), 영업일 수와 전일 기준일은
@@ -4508,6 +4631,8 @@ function market(){
       el.title = "오늘 값이 아닙니다. 최신 스냅샷이 아직 반영되지 않았습니다.";
     }
   }
+  Array.prototype.forEach.call((($("#mspan")||{}).querySelectorAll) ? $("#mspan").querySelectorAll("button") : [],
+    function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-s") === mktSpan ? "true" : "false"); });
   $("#market").innerHTML =
       sec("원자재", MARKET.mat, "종가")
     + sec("유가 · 나프타", MARKET.oil, "종가")
@@ -4517,8 +4642,31 @@ function market(){
     + '<b>전월대비</b>는 당월평균 vs 전월평균, <b>전일대비</b>는 당일값 vs 직전 거래일입니다. '
     + '상승 빨강 / 하락 파랑. '
     + '당일값은 항목별 최신 고시일 기준이라 날짜가 다를 수 있고, 전일대비의 기준일도 항목마다 다릅니다(카드에 마우스를 올리면 표시). '
-    + '추이 그래프는 완결된 '+(MARKET.chartEnd||"")+' 까지입니다.</p>';
+    + '그래프·상세표의 월평균은 완결된 '+(MARKET.chartEnd||"")+' 까지, 연평균은 '+(MARKET.yearEnd||"")+'까지입니다.</p>';
+  trendTouch($("#market"));
 }
+
+/* 시세 탭 : 그래프 기간(12개월/5개년) 전환 · 카드별 상세표 접기 */
+(function(){
+  var sg = $("#mspan");
+  if(sg) sg.addEventListener("click", function(e){
+    var b = e.target.closest("button[data-s]");
+    if(!b) return;
+    mktSpan = b.getAttribute("data-s");
+    market();
+  });
+  var host = $("#market");
+  if(host) host.addEventListener("click", function(e){
+    var b = e.target.closest(".mtblt");
+    if(!b) return;
+    var wrap = b.nextElementSibling;
+    var open = b.getAttribute("aria-expanded") === "true";
+    b.setAttribute("aria-expanded", open ? "false" : "true");
+    b.classList.toggle("on", !open);
+    b.querySelector(".cv").textContent = open ? "›" : "⌄";
+    if(wrap) wrap.hidden = open;
+  });
+})();
 
 /* ── 추이 접기 ──────────────────────────────── */
 (function(){
