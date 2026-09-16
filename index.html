@@ -532,6 +532,10 @@ table.ov tr.miss td{color:var(--mute)}
 .mtbl th,.mtbl td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line2);
   font-variant-numeric:tabular-nums;white-space:nowrap}
 .mtbl thead th{position:sticky;top:0;background:var(--card2);color:var(--mute);font-weight:700}
+/* '월'(또는 '연도') 칸만 본문은 왼쪽 정렬(아래 tbody th)인데 머리글은
+   공통 규칙(위 .mtbl th,.mtbl td)의 오른쪽 정렬을 그대로 물려받아
+   따로 놀았다 — 요청 2026-09-16, 11차 */
+.mtbl thead th:first-child{text-align:left}
 .mtbl tbody th{text-align:left;font-weight:700;color:var(--body)}
 .mtd.up{color:var(--up)} .mtd.dn{color:var(--down)} .mtd.na{color:var(--mute)}
 
