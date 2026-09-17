@@ -603,6 +603,14 @@ table.ov tr.miss td{color:var(--mute)}
 @media (max-width:640px){
   .mcard.full .mtbl{font-size:18px}
   .mcard.full .mtbl th,.mcard.full .mtbl td{padding:10px 12px}
+  /* 모바일에서 12개월·5개년(일반) 표와 전체년도(막대) 표의 글자 크기가 서로
+     달라 보이던 것을 통일한다 — 일반 15.5px · 전체 21px 두 크기의 평균인
+     18px로 맞춘다 (요청 2026-09-17) */
+  .mcard:not(.full) .mtbl{font-size:18px!important}
+  .mcard.full .mtbl thead th{font-size:18px!important}
+  .mcard.full .mtbl tbody th{font-size:18px!important}
+  .mcard.full .mtbl .mval .mv{font-size:18px!important}
+  .mcard.full .mtbl .mtd{font-size:18px!important}
 }
 /* '월'(또는 '연도') 칸만 본문은 왼쪽 정렬(아래 tbody th)인데 머리글은
    공통 규칙(위 .mtbl th,.mtbl td)의 오른쪽 정렬을 그대로 물려받아
@@ -3469,7 +3477,8 @@ function chips(){
       ? "2022~2026년 확인분 " + v.length + "곳"
       : (m.official ? "그 해 공식 발표 " + m.official + "개 지자체 · 확인 " + v.length + "곳"
                     : "확인 " + v.length + "곳"))
-    + (unk ? " · 인원 미확인 " + unk + "곳" : "")
+    /* '인원 미확인 N곳' 문구는 공개 페이지에 그대로 적어두기엔 부적절하다는
+       지적으로 삭제한다 — 요청 2026-09-17. 내부 확인용으로는 unk 변수에 남아있다 */
     + (function(){ var a = v.filter(function(s){ return s.mode === "협약"; }).length;
         return a ? " · 협약만 " + a + "곳" : ""; })();
 }
@@ -3522,8 +3531,10 @@ function stats(){
   var aw = wonSplit(amt), pw = (bc && ba) ? [Math.round(ba/bc/10000).toLocaleString(), "만 원"] : ["—", ""];
   var cells = [
     ["전달 지역", v.length, "곳", "", "hl"],
-    ["장학생", (cnt ? cnt.toLocaleString() : "—"), "명", ncnt ? ncnt+"곳 미확인" : "", "hl"],
-    ["장학금", aw[0], aw[1], namt ? namt+"곳 미확인" : "", "hl"],
+    /* '00곳 미확인' 덧말은 공개 페이지에 적어두기엔 부적절하다는 지적으로
+       삭제한다 — 요청 2026-09-17 */
+    ["장학생", (cnt ? cnt.toLocaleString() : "—"), "명", "", "hl"],
+    ["장학금", aw[0], aw[1], "", "hl"],
     ["광역시·도", Object.keys(prov).length, "개", "", ""],
     /* 지표는 FIXY(2026) 고정이고 2026년 39곳은 인원·금액이 전부 확인돼 있다.
        "39곳 기준" 은 첫 칸의 "39곳" 과 같은 숫자여서 정보를 더하지 않는다 → 뺀다 */
@@ -3542,7 +3553,7 @@ function stats(){
   if($("#sheadn")){
     var unk2 = v.filter(function(s){ return s.cnt == null; }).length;
     $("#sheadn").textContent = FIXY + "년 확인분 · " + v.length + "곳"
-      + (unk2 ? " · 인원 미확인 " + unk2 + "곳" : "");
+      ;                                     /* '인원 미확인 N곳' 문구 삭제 — 요청 2026-09-17 */
   }
   /* 숫자 세 개만 굵게 : 줄 전체를 굵게 하면 위 통계 카드와 위계가 겹친다 */
   $("#legacy").innerHTML =
@@ -3927,8 +3938,7 @@ function map(){
       L.push('<span><i class="g"></i>대학 · 고교 · 교육청 등 기관</span>');
       if(v0.some(function(s){ return s.mode === "협약"; }))
         L.push('<span><i class="a"></i>협약만 확인 (수여식은 별건)</span>');
-      if(v0.some(function(s){ return s.mode === "미확인"; }))
-        L.push('<span><i class="u"></i>일정만 확인 · 내용 미확인</span>');
+      /* '내용 미확인' 범례 문구도 공개 페이지에는 적지 않는다 — 요청 2026-09-17 */
       if(v0.some(function(s){ return s.mode === "기부"; }))
         L.push('<span><i class="don"></i>장학금 외 기부(대학·병원 등) · 합계에서 제외</span>');
     }
