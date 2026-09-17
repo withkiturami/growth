@@ -542,12 +542,23 @@ table.ov tr.miss td{color:var(--mute)}
 .mcard.full .mg .ml:first-child{border-left:0;padding-left:0}
 .mcard.full .mg span{font-size:12px!important}
 .mcard.full .mg b,.mcard.full .mg .chg{font-size:16px!important}
+/* 당월평균·전월평균(평균값 두 개)을 먼저, 전월대비·전일대비(증감률 두 개)를
+   뒤로 — flex로 바꾸며 마크업 순서(평균/대비/평균/대비)가 그대로 노출돼
+   시안(A안)과 다르게 보였다 — order로만 바로잡는다, 마크업은 그대로 (2026-09-17) */
+.mcard.full .mg>*:nth-child(1){order:1}
+.mcard.full .mg>*:nth-child(2){order:3}
+.mcard.full .mg>*:nth-child(3){order:2}
+.mcard.full .mg>*:nth-child(4){order:4}
 @media (max-width:640px){
   .mcard.full .n{font-size:20px!important}
   .mcard.full .v{font-size:42px!important}
   .mcard.full .mg{flex-wrap:wrap!important;row-gap:12px!important}
   .mcard.full .mg .ml,.mcard.full .mg .mr{flex:1 1 45%!important;border-left:0!important}
 }
+/* 다른 그래프(12개월·5개년 카드)에도 같은 통화 배지 스타일을 통일 적용
+   — 히어로 넘버에서만 쓰던 알약형 단위 표시를 전체 카드로 확장 (2026-09-17) */
+.mcard:not(.full) .u{color:var(--mkt);background:var(--mkt-bg);
+  border:1px solid var(--mkt-ln);border-radius:999px;padding:1px 8px;font-weight:600}
 .mchart.mchart-detail{padding-top:14px}
 .mchart.mchart-detail .tln{stroke-width:2.6}
 .mgy{stroke:var(--line2);stroke-width:1;stroke-dasharray:3 3}
