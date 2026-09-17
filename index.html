@@ -318,9 +318,7 @@ table.ov tr.miss td{color:var(--mute)}
 .legend i.y1{background:var(--y1)} .legend i.y2{background:var(--y2)}
 .legend i.y3{background:var(--y3)} .legend i.y4{background:var(--y4)}
 .legend i.y5{background:var(--y5)}
-.legend i.don{background:var(--don)}
-.mk .dot.don{fill:var(--don)}
-.ylegend i.don{background:var(--don)}
+/* 기부(발전기금 등) 표식도 다른 표식과 같은 색으로 통일 — 요청 2026-09-17 */
 
 .mtog[hidden]{display:none}
 /* 전체 보기 : 표식이 122개라 후광을 빼고 선택한 것만 남긴다 */
@@ -330,8 +328,6 @@ table.ov tr.miss td{color:var(--mute)}
 .kmap.dense .mk.sel .halo,.kmap.dense .mk:hover .halo{opacity:.3}
 /* 선택 강조는 연도 색보다 뒤에 와야 이긴다 */
 .mk.sel .dot,.mk[aria-pressed="true"] .dot{fill:var(--acc-2);stroke:var(--ink);stroke-width:2}
-/* 기부(발전기금 등) 표식은 선택돼도 파란색으로 안 바뀌게 — 요청 2026-09-17 */
-.mk.sel .dot.don,.mk[aria-pressed="true"] .dot.don{fill:var(--don)}
 
 .chip.wr{border-color:var(--gold);color:var(--gold);background:var(--gold-w)}
 .erow .en i.ag{font-style:normal;font-size:9.5px;font-weight:700;color:var(--gold);
@@ -3820,8 +3816,11 @@ function map(){
         g.sort(function(a,b){ return SPOTS[a].date < SPOTS[b].date ? -1 : 1; });
         g.forEach(function(i, n){
           var t = -Math.PI/2 + n * 2*Math.PI/g.length;
-          px[i] = SPOTS[i].x + Math.cos(t)*R;
-          py[i] = SPOTS[i].y + Math.sin(t)*R;
+          /* 제주 표식이 겹쳐 흩어질 때도 인셋 이동을 적용한다 — 안 하면 본토 밖
+             원래 제주 좌표(좌측 하단)에 그대로 남아 떨어져 보인다 (요청 2026-09-17) */
+          var jj2 = (SPOTS[i].prov === "제주");
+          px[i] = SPOTS[i].x + (jj2 ? jdx : 0) + Math.cos(t)*R;
+          py[i] = SPOTS[i].y + (jj2 ? jdy : 0) + Math.sin(t)*R;
         });
       });
     }
