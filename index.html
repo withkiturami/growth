@@ -330,6 +330,8 @@ table.ov tr.miss td{color:var(--mute)}
 .kmap.dense .mk.sel .halo,.kmap.dense .mk:hover .halo{opacity:.3}
 /* 선택 강조는 연도 색보다 뒤에 와야 이긴다 */
 .mk.sel .dot,.mk[aria-pressed="true"] .dot{fill:var(--acc-2);stroke:var(--ink);stroke-width:2}
+/* 기부(발전기금 등) 표식은 선택돼도 파란색으로 안 바뀌게 — 요청 2026-09-17 */
+.mk.sel .dot.don,.mk[aria-pressed="true"] .dot.don{fill:var(--don)}
 
 .chip.wr{border-color:var(--gold);color:var(--gold);background:var(--gold-w)}
 .erow .en i.ag{font-style:normal;font-size:9.5px;font-weight:700;color:var(--gold);
