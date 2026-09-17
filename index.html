@@ -3776,6 +3776,21 @@ function map(){
   if(mode !== "p"){
     var order = v.map(function(s){ return SPOTS.indexOf(s); })
                  .sort(function(a,b){ return SPOTS[b].cnt - SPOTS[a].cnt; });
+    /* 같은 지역(같은 좌표)에 여러 번 전달됐어도 지도에는 가장 최근 1건만 표기한다.
+       (연도 필터가 걸려 있어도, 전체보기여도 동일하게 적용) 목록에서 과거 기록을
+       직접 선택했을 때(cur)는 예외로 그 기록을 그대로 보여준다 — 요청 2026-09-17 */
+    (function(){
+      var latest = {};
+      order.forEach(function(i){
+        var s = SPOTS[i], k = Math.round(s.x)+","+Math.round(s.y);
+        if(!(k in latest)){ latest[k] = i; return; }
+        if(latest[k] === cur) return;
+        if(i === cur || SPOTS[i].date > SPOTS[latest[k]].date) latest[k] = i;
+      });
+      var keep = {};
+      for(var k in latest) keep[latest[k]] = 1;
+      order = order.filter(function(i){ return keep[i]; });
+    })();
     /* 38곳이 한 화면에 들어가면 라벨이 뭉친다.
        마커를 먼저 다 깔고, 라벨은 빈 자리를 찾은 것만 그린다.
        자리를 못 찾은 곳은 오른쪽 [전달 기록] 목록에서 전부 볼 수 있다. */
