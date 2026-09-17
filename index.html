@@ -521,27 +521,29 @@ table.ov tr.miss td{color:var(--mute)}
    상대적으로 작아 보였다. 이름 → 큰 시세 숫자 → 4분할 보조지표 띠 순서로
    위에서 아래로 시선이 내려가게 다시 짰다(세 시안 중 A안 채택).
    그래프·"월별 상세 보기" 버튼·마크업은 그대로, .full 스코프 CSS만 새로 얹는다 */
-.mcard.full .t{align-items:center!important;gap:10px!important;
-  position:relative;padding-left:14px!important;margin-bottom:2px!important}
+.mcard.full{text-align:left!important}
+.mcard.full .t{align-items:center!important;justify-content:flex-start!important;
+  gap:10px!important;position:relative;padding-left:14px!important;margin-bottom:2px!important}
 .mcard.full .t::before{content:"";position:absolute;left:0;top:1px;bottom:1px;
   width:4px;border-radius:2px;background:var(--mkt)}
 .mcard.full .n{font-size:24px!important;font-weight:800!important;letter-spacing:-.01em}
 .mcard.full .u{font-size:12.5px!important;color:var(--mkt)!important;
   background:var(--mkt-bg);border:1px solid var(--mkt-ln);border-radius:999px;
   padding:2px 10px!important;font-weight:600}
-.mcard.full .v{display:flex!important;align-items:baseline!important;gap:12px!important;
-  font-size:60px!important;margin-top:10px!important}
+.mcard.full .v{display:flex!important;align-items:baseline!important;justify-content:flex-start!important;
+  gap:12px!important;font-size:60px!important;margin-top:10px!important}
 .mcard.full .v .vl{font-size:13.5px!important;font-weight:600!important;
   color:var(--mute)!important;font-style:normal}
 .mcard.full .mg{display:flex!important;grid-template-columns:none!important;
-  border-top:1px solid var(--line2);margin-top:16px!important;
-  padding-top:13px!important;gap:0!important}
+  border-top:1px solid var(--line2);margin-top:18px!important;
+  padding-top:15px!important;gap:0!important}
 .mcard.full .mg .ml,.mcard.full .mg .mr{flex:1;flex-direction:column!important;
   align-items:flex-start!important;justify-content:flex-start!important;
-  gap:2px!important;padding:0 16px;border-left:1px solid var(--line2)}
+  gap:5px!important;padding:0 16px;border-left:1px solid var(--line2)}
 .mcard.full .mg .ml:first-child{border-left:0;padding-left:0}
-.mcard.full .mg span{font-size:12px!important}
-.mcard.full .mg b,.mcard.full .mg .chg{font-size:16px!important}
+/* 어르신도 바로 읽히도록 라벨·값 모두 큰 폭으로 확대 (요청 2026-09-17, 3차) */
+.mcard.full .mg span{font-size:17px!important;font-weight:500!important;color:var(--mute)!important}
+.mcard.full .mg b,.mcard.full .mg .chg{font-size:24px!important}
 /* 당월평균·전월평균(평균값 두 개)을 먼저, 전월대비·전일대비(증감률 두 개)를
    뒤로 — flex로 바꾸며 마크업 순서(평균/대비/평균/대비)가 그대로 노출돼
    시안(A안)과 다르게 보였다 — order로만 바로잡는다, 마크업은 그대로 (2026-09-17) */
@@ -552,8 +554,10 @@ table.ov tr.miss td{color:var(--mute)}
 @media (max-width:640px){
   .mcard.full .n{font-size:20px!important}
   .mcard.full .v{font-size:42px!important}
-  .mcard.full .mg{flex-wrap:wrap!important;row-gap:12px!important}
+  .mcard.full .mg{flex-wrap:wrap!important;row-gap:16px!important}
   .mcard.full .mg .ml,.mcard.full .mg .mr{flex:1 1 45%!important;border-left:0!important}
+  .mcard.full .mg span{font-size:15px!important}
+  .mcard.full .mg b,.mcard.full .mg .chg{font-size:21px!important}
 }
 /* 다른 그래프(12개월·5개년 카드)에도 같은 통화 배지 스타일을 통일 적용
    — 히어로 넘버에서만 쓰던 알약형 단위 표시를 전체 카드로 확장 (2026-09-17) */
