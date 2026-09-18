@@ -552,7 +552,6 @@ table.ov tr.miss td{color:var(--mute)}
 /* 어르신도 바로 읽히도록 라벨·값 모두 큰 폭으로 확대 (요청 2026-09-17, 3차) */
 .mcard.full .mg span{font-size:19.6px!important;font-weight:500!important;color:var(--mute)!important}
 .mcard.full .mg b,.mcard.full .mg .chg{font-size:27.6px!important}
-.mcard.full .chg .chgv{font-size:.65em!important;font-weight:600!important;opacity:.82}
 /* 당월평균·전월평균(평균값 두 개)을 먼저, 전월대비·전일대비(증감률 두 개)를
    뒤로 — flex로 바꾸며 마크업 순서(평균/대비/평균/대비)가 그대로 노출돼
    시안(A안)과 다르게 보였다 — order로만 바로잡는다, 마크업은 그대로 (2026-09-17) */
@@ -623,6 +622,7 @@ table.ov tr.miss td{color:var(--mute)}
 .mtbl tbody th{text-align:left;font-weight:700;color:var(--body)}
 .mtd.up{color:var(--up)} .mtd.dn{color:var(--down)} .mtd.na{color:var(--mute)}
 .mtbl .mosub{display:block;font-size:.72em;font-weight:500;color:var(--mute)}
+.mtbl .mtd .mtdp{font-size:.78em;font-weight:600;opacity:.85;white-space:nowrap}
 
 /* 시세 띠 — 월/일 두 지표 */
 .ti .v{margin-top:1px}
@@ -4837,7 +4837,14 @@ function mktTable(c, full){
   for(var i = n - 1; i >= 0; i--){
     var chg = (i > 0) ? (s[i].v - s[i-1].v) : null;
     var pct2 = (i > 0 && s[i-1].v) ? (chg / s[i-1].v * 100) : null;
+    /* 변동액+퍼센트 표기는 칸이 넓은 전체이력(full)에서만 — 12개월·5개년
+       (일반) 표에서는 실측 결과 표 너비를 넘겨 가로 스크롤이 생겼다
+       (요청 2026-09-18, 3차) */
     var chip = (pct2 == null) ? '<span class="mtd na">—</span>'
+      : full
+      ? '<span class="mtd '+(pct2 >= 0 ? "up" : "dn")+'">'+(pct2 >= 0 ? "▲" : "▼")
+        + sym + f(Math.abs(chg))
+        + ' <span class="mtdp">('+(pct2 >= 0 ? "+" : "-")+Math.abs(pct2).toFixed(1)+'%)</span></span>'
       : '<span class="mtd '+(pct2 >= 0 ? "up" : "dn")+'">'+(pct2 >= 0 ? "▲" : "▼")
         + Math.abs(pct2).toFixed(1)+'%</span>';
     var valCell;
@@ -4860,19 +4867,15 @@ function market(){
     if(v == null) return "—";
     var d = NDEC(v, dec, unit);
     return v.toLocaleString("ko-KR", {minimumFractionDigits: d, maximumFractionDigits: d}); };
-  /* 사내 데일리 리포트 카드 형식 : 당월평균·전월평균 / 전월대비·전일대비 */
-  var pct = function(v, amtStr){
+  /* 사내 데일리 리포트 카드 형식 : 당월평균·전월평균 / 전월대비·전일대비.
+     변동액은 여기(상단 카드)에는 안 붙인다 — 월별/연도별 상세표로 옮겼다
+     (요청 2026-09-18, 2차) */
+  var pct = function(v){
     if(v == null) return '<b class="chg na">—</b>';
     var up = v >= 0;
     return '<b class="chg '+(up?'up':'dn')+'">'+(up?"▲":"▼")
-      + Math.abs(v).toFixed(2)+'%'
-      + (amtStr ? '<span class="chgv"> ('+amtStr+')</span>' : '')
-      + '</b>';
+      + Math.abs(v).toFixed(2)+'%</b>';
   };
-  /* 변동액 = 당월평균-전월평균 / 당일값-전일값. 칸이 좁은 일반 카드에서는
-     넘치므로 전체이력(detail) 카드에서만 붙인다 */
-  var chgAmt = function(a, b, dec, unit){
-    return (detail && a != null && b != null) ? f(Math.abs(a - b), dec, unit) : null; };
   /* '전체'(f) — 2022년 1월부터의 월별 전체 이력. 미니 그래프(12개월/5개년)와는
      다른 상세 그래프(mktChartDetail)로 그려 구분한다 — 요청 2026-09-16, 5차 */
   var detail = (mktSpan === "f");
@@ -4895,9 +4898,9 @@ function market(){
       +   '<em class="vl">'+r.date.slice(5).replace("-", ".")+' '+dlbl+'</em></div>'
       + '<div class="mg">'
       +   '<div class="ml"><span>당월평균</span><b>'+f(r.month, r.dec, r.unit)+'</b></div>'
-      +   '<div class="mr"><span>전월대비</span>'+pct(r.vsPrev, chgAmt(r.month, r.prev, r.dec, r.unit))+'</div>'
+      +   '<div class="mr"><span>전월대비</span>'+pct(r.vsPrev)+'</div>'
       +   '<div class="ml"><span>전월평균</span><b>'+f(r.prev, r.dec, r.unit)+'</b></div>'
-      +   '<div class="mr"><span>전일대비</span>'+pct(r.vsDay, chgAmt(r.daily, r.pday, r.dec, r.unit))+'</div>'
+      +   '<div class="mr"><span>전일대비</span>'+pct(r.vsDay)+'</div>'
       + '</div>'
       + (c ? (detail
           ? '<div class="mchart mchart-detail tf">'+mktChartDetail(c)+'</div>'
