@@ -498,10 +498,6 @@ table.ov tr.miss td{color:var(--mute)}
 .mcard .chg.up{color:var(--up)} .mcard .chg.dn{color:var(--down)}
 .mcard .chg.na{color:var(--mute);font-weight:600}
 .mcard .dt{margin-top:7px;padding-top:6px;border-top:1px solid var(--line2);font-size:10.5px}
-.mcard .mg.mg-d{display:flex!important;flex-wrap:wrap;column-gap:14px;row-gap:4px}
-.mcard .mg.mg-d .mgi{font-size:11.5px;color:var(--mute);display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap}
-.mcard .mg.mg-d .mgi b{font-weight:700;color:var(--body);font-variant-numeric:tabular-nums}
-.mcard .mg.mg-d .mtdp{font-size:.85em;font-weight:600;opacity:.85}
 /* 시세 탭 카드 안 미니 그래프 · 월별(연도별) 상세표 — 요청 2026-09-16
    .tf 클래스를 같이 줘서 손가락·마우스로 짚으면 숫자가 뜨는 trendTouch() 를
    그대로 재사용한다 (요청 2026-09-16, 2차) — 카드용 크기로만 .tf 기본 박스를 지운다 */
@@ -4903,35 +4899,16 @@ function market(){
        같은 22px 인데도 한글(구리·아연)보다 작게 보인다 → 클래스로 보정한다 */
     var en = /^[\x20-\x7E]+$/.test(r.nm) ? " en" : "";
     var c = chMap[r.nm];
-    var mgHtml;
-    if(mktSpan === "d" && c && c.series && c.series.length >= 2){
-      var ds = c.series, dn = ds.length;
-      var avg30 = ds.reduce(function(sum, p){ return sum + p.v; }, 0) / dn;
-      var d0 = ds[0].v, d1 = ds[dn - 1].v;
-      var chg30 = d1 - d0;
-      var pct30 = (d0 !== 0) ? (chg30 / d0 * 100) : null;
-      var up30 = chg30 >= 0;
-      var chg30Html = '<b class="chg '+(up30?"up":"dn")+'">'+(up30?"▲":"▼")+f(Math.abs(chg30), r.dec, r.unit)
-        + (pct30 != null ? ' <span class="mtdp">('+(up30?"+":"-")+Math.abs(pct30).toFixed(1)+'%)</span>' : '')
-        + '</b>';
-      mgHtml = '<div class="mg mg-d">'
-        + '<span class="mgi">30일 평균 <b>'+f(avg30, r.dec, r.unit)+'</b></span>'
-        + '<span class="mgi">30일간 '+chg30Html+'</span>'
-        + '<span class="mgi">전일대비 '+pct(r.vsDay)+'</span>'
-        + '</div>';
-    } else {
-      mgHtml = '<div class="mg">'
-        +   '<div class="ml"><span>당월평균</span><b>'+f(r.month, r.dec, r.unit)+'</b></div>'
-        +   '<div class="mr"><span>전월대비</span>'+pct(r.vsPrev)+'</div>'
-        +   '<div class="ml"><span>전월평균</span><b>'+f(r.prev, r.dec, r.unit)+'</b></div>'
-        +   '<div class="mr"><span>전일대비</span>'+pct(r.vsDay)+'</div>'
-        + '</div>';
-    }
     return '<div class="mcard'+(detail?" full":"")+'" title="'+esc(tip)+'"><div class="t"><span class="n'+en+'">'+esc(r.nm)+'</span>'
       + '<span class="u">'+esc(r.unit)+'</span></div>'
       + '<div class="v">'+f(r.daily, r.dec, r.unit)
       +   '<em class="vl">'+r.date.slice(5).replace("-", ".")+' '+dlbl+'</em></div>'
-      + mgHtml
+      + '<div class="mg">'
+      +   '<div class="ml"><span>당월평균</span><b>'+f(r.month, r.dec, r.unit)+'</b></div>'
+      +   '<div class="mr"><span>전월대비</span>'+pct(r.vsPrev)+'</div>'
+      +   '<div class="ml"><span>전월평균</span><b>'+f(r.prev, r.dec, r.unit)+'</b></div>'
+      +   '<div class="mr"><span>전일대비</span>'+pct(r.vsDay)+'</div>'
+      + '</div>'
       + (c ? (detail
           ? '<div class="mchart mchart-detail tf">'+mktChartDetail(c)+'</div>'
           : '<div class="mchart tf">'+mktChart(c)+'</div>')
