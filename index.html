@@ -1632,9 +1632,19 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
 .hwin{font-size:15px!important;font-weight:700!important}
 
 /* 숫자 타일 4개 */
-.hsum.big{gap:10px!important;margin-top:6px!important}
-.hsum.big b{padding:14px 14px 12px!important}
-.hsum.big b i{font-size:30px!important}
+/* 값이 길어지면(797명 · 110건 · 8.5억 원) 1fr 칸이 내용 폭 아래로 못 줄어
+   패널 밖으로 밀려 잘렸다. 칸을 줄일 수 있게 하고(minmax) 여백·글씨를
+   내용에 맞춘다 — 실측 기준 최악값 '8.5억 원' (요청 2026-09-21) */
+.hsum.big{gap:10px!important;margin-top:6px!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+.hsum.big b{padding:14px 10px 12px!important;min-width:0!important}
+.hsum.big b i{font-size:26px!important}
+/* 좌우 3단이 유지되는 중간 폭에서는 칸이 더 좁아진다(실측 75px) */
+@media (max-width:1279px){
+  .hsum.big b{padding:13px 6px 11px!important}
+  .hsum.big b i{font-size:21px!important}
+  .hsum.big b span{font-size:13px!important}
+}
 .hsum.big b span{font-size:15px!important;margin-top:4px!important}
 
 /* 기사 미리보기 */
@@ -3024,6 +3034,25 @@ header{padding-bottom:12px!important}
   justify-content:flex-start!important;font-weight:700!important}
 #rwrap[hidden]{display:none}
 @media (max-width:900px){ .sbg{grid-template-columns:1fr} }
+/* ══ 뉴스레터 탭 : 좌우 단차 · 긴 요약 손보기 (요청 2026-09-21) ═══════
+   ① 왼쪽 호 목록이 오른쪽 본문보다 한참 아래까지 흘러내려 바닥이 어긋나
+      보였다. 목록 자체에 스크롤을 주고 높이를 화면 안으로 묶는다.
+   ② 주간 동행 / 주간 성장은 행 단위 그리드로 바꿔(위 ipane) 같은 순번끼리
+      같은 높이에 놓는다.
+   ③ 요약이 길어 카드 높이가 제각각이고 읽기도 부담스러웠다 — 두 줄로 자른다.
+      전문은 제목을 눌러 원문에서 본다.                                   */
+.arail{max-height:calc(100vh - 32px)!important;overflow:hidden}
+.ilist{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.sbg{display:grid!important;grid-template-columns:1fr 1fr!important;
+  column-gap:26px!important;row-gap:0!important;align-items:stretch!important}
+.sbg>.isect{margin:0 0 10px!important}
+.sbg>.acard.sc{height:100%;box-sizing:border-box}
+.scgap{border-top:1px solid var(--line2)}
+.acard.sc h3{font-size:18px!important;line-height:1.4!important;margin:6px 0 7px!important;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.acard.sc p{font-size:13.5px!important;line-height:1.62!important;color:var(--mute)!important;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sbf{font-size:11.5px!important;opacity:.85}
 :root[data-theme="dark"] .sendbox{border-color:#3E3126;
   background:linear-gradient(158deg,#1C1610 0%,var(--card) 58%,var(--card) 100%)}
 :root[data-theme="dark"] .sbh b{color:#E8A76B}
@@ -5123,6 +5152,7 @@ function market(){
         b.setAttribute("aria-selected", on ? "true" : "false");
         pn.hidden = !on;
       });
+      if(typeof railFit === "function") railFit();   /* 탭을 켠 뒤 높이 재계산 */
     };
   });
 })();
@@ -5239,6 +5269,20 @@ function pickSend(ref, wantSoc, n){
   }
   return out.slice(0, n);
 }
+/* 왼쪽 호 목록의 높이를 오른쪽 본문에 맞춘다 — 바닥 단차 제거 (요청 2026-09-21)
+   본문이 화면보다 길면 화면 높이까지만(붙어 따라오는 목록이므로 그 이상은 의미가 없다) */
+function railFit(){
+  var rail = document.querySelector(".arail"), pane = document.getElementById("ipane");
+  if(!rail || !pane) return;
+  /* 탭이 숨어 있을 땐 높이가 0 이라 그대로 쓰면 목록이 사라진다 */
+  if(!pane.offsetHeight){ rail.style.removeProperty("max-height"); return; }
+  if(window.innerWidth <= 1100){ rail.style.removeProperty("max-height"); return; }
+  /* css 쪽이 !important 라 인라인만으로는 안 먹는다 */
+  rail.style.setProperty("max-height",
+    Math.min(window.innerHeight - 32, pane.offsetHeight) + "px", "important");
+}
+window.addEventListener("resize", railFit);
+
 function ipane(){
   var i = ISSUES[icur], items = i.items.filter(ihit);
   /* 대문 두 칸과 같은 기준으로 나눈다 (2026-09-09)
@@ -5290,10 +5334,18 @@ function ipane(){
     + '건 + 주간 성장 '+sGrw.length+'건</span>'
     + (nOld ? '<span class="chip pw">이전 주에서 '+nOld+'건</span>' : '') + '</div>'
     + '<div class="sbg">'
-    + '<div><div class="isect so">주간 동행</div>'
-    +   (sSoc.length ? sSoc.map(scard).join("") : '<div class="empty">없음</div>') + '</div>'
-    + '<div><div class="isect gr">주간 성장</div>'
-    +   (sGrw.length ? sGrw.map(scard).join("") : '<div class="empty">없음</div>') + '</div>'
+    + '<div class="isect so">주간 동행</div><div class="isect gr">주간 성장</div>'
+    /* 좌우를 행 단위로 짝지어 넣는다 — 같은 순번끼리 한 줄에 놓으면
+       그리드가 행 높이를 큰 쪽에 맞춰 두 칸의 높이가 어긋나지 않는다
+       (요청 2026-09-21 : "주간 동행 · 성장 같은 높이면 좋겠어") */
+    + (function(){
+        var n = Math.max(sSoc.length, sGrw.length), o = "", r;
+        if(!n) return '<div class="empty">없음</div><div class="empty">없음</div>';
+        for(r = 0; r < n; r++)
+          o += (sSoc[r] ? scard(sSoc[r]) : '<div class="scgap"></div>')
+             + (sGrw[r] ? scard(sGrw[r]) : '<div class="scgap"></div>');
+        return o;
+      })()
     + '</div>'
     + '<p class="sbf">성장 소식이 없는 주에는 8주 → 12주 순으로 창을 넓혀 채우므로 '
     + '이전 주 기사가 다시 실릴 수 있습니다(중복 허용). 제목을 누르면 기사로 이동합니다.</p>';
@@ -5313,6 +5365,7 @@ function ipane(){
   if(!items.length && !sSoc.length && !sGrw.length)
     h += '<div class="empty">검색어에 해당하는 기사가 이 호에 없습니다.</div>';
   document.getElementById("ipane").innerHTML = h;
+  railFit();
   /* ── PDF 단추 : 파일이 없을 때 브라우저 오류 화면으로 튀지 않게 한다 ──
      원인 (2026-09-10 재현) : index.html 만 받아 열면 pdf 폴더가 없어
      ERR_FILE_NOT_FOUND / "이 사이트에서 사용할 수 없는 파일" 화면으로 넘어간다.
