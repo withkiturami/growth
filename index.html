@@ -623,6 +623,23 @@ table.ov tr.miss td{color:var(--mute)}
 .mtd.up{color:var(--up)} .mtd.dn{color:var(--down)} .mtd.na{color:var(--mute)}
 .mtbl .mosub{display:block;font-size:.72em;font-weight:500;color:var(--mute)}
 .mtbl .mtd .mtdp{font-size:.78em;font-weight:600;opacity:.85;white-space:nowrap}
+/* ══ 모바일 (요청 2026-09-23) ══
+   · 기간 버튼 4개가 글씨가 커서 두 줄로 꺾였다 → 한 줄, 네 칸 같은 폭
+   · 월별 이력 카드가 너무 길다 → 그래프 높이를 줄이고 요약 칸 간격을 좁힌다 */
+@media (max-width:640px){
+  #mspan{display:flex!important;width:100%}
+  #mspan button{flex:1 1 0;min-width:0;white-space:nowrap;font-size:13px!important;
+    padding:9px 2px!important;letter-spacing:-.02em}
+  .mcard.full .v{font-size:36px!important;margin-top:6px!important}
+  .mcard.full .mg{margin-top:12px!important;padding-top:10px!important;row-gap:8px!important}
+  .mcard.full .mg .ml,.mcard.full .mg .mr{gap:2px!important}
+  .mcard.full .mg span{font-size:13px!important}
+  .mcard.full .mg b,.mcard.full .mg .chg{font-size:18px!important}
+  .mcard.full .mchart.mchart-detail{padding-top:6px}
+  .mcard.full .tfoot{font-size:12px!important}
+  .mcard.full .mtog.mtblt{font-size:16px;padding:9px 12px;margin-top:7px}
+  .mcard.full .mtog.mtblt .cv{font-size:15px}
+}
 /* ══ 월별 이력(전체) 카드 : 현재의 75% 크기로 (요청 2026-09-23) ══════════
    너무 크고 여백이 없어 답답하다는 지적. 모양·순서는 그대로 두고 글자·간격·
    그래프 높이만 0.75배로, 카드 안쪽 여백은 조금 넓혔다. 데스크톱만 (모바일은 그대로).
@@ -4821,13 +4838,15 @@ function mktChartDetail(c){
      가로 폭을 미니 그래프(320)와 맞춰 글자 크기를 그대로 맞추고, 세로만 키워
      '상세' 느낌은 유지한다 — 요청 2026-09-16, 7차 */
   var MOBILE = (typeof window !== "undefined" && window.innerWidth <= 699);
-  var W = MOBILE ? 320 : 1200, H = MOBILE ? 420 : 340,   /* 데스크톱 900→1200 : 같은 폭에서 0.75배 (2026-09-23) */
+  var W = MOBILE ? 320 : 1200, H = MOBILE ? 240 : 340,   /* 모바일 420→240 : 너무 길다 (2026-09-23) */   /* 데스크톱 900→1200 : 같은 폭에서 0.75배 (2026-09-23) */
       L = MOBILE ? 10  : 36,  R = MOBILE ? 10  : 36,
       T = MOBILE ? 42  : 46,  B = MOBILE ? 38  : 40;
   var vs = s.map(function(p){ return p.v; });
   var mn = Math.min.apply(null, vs), mx = Math.max.apply(null, vs);
   var pad = (mx - mn) * 0.14 || 1;
-  var lo = mn - pad, hi = mx + pad;
+  /* 모바일은 그래프 높이를 줄여서(2026-09-23) 아래 '최저' 표시가 연도 눈금과 겹친다
+     → 아래쪽 여유만 넓혀 최저 표시가 눈금 위에 앉게 한다 */
+  var lo = mn - pad * (MOBILE ? 2.8 : 1), hi = mx + pad;
   var X = function(i){ return L + i * (W - L - R) / (n - 1); };
   var Y = function(v){ return T + (hi - v) / (hi - lo) * (H - T - B); };
   var d = s.map(function(p, i){ return (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(p.v).toFixed(1); }).join(" ");
@@ -4853,7 +4872,8 @@ function mktChartDetail(c){
   var grid = s.map(function(p, i){
     if(p.ym.slice(5) !== "01") return "";
     return '<line class="mgy" x1="'+X(i).toFixed(1)+'" y1="'+T+'" x2="'+X(i).toFixed(1)+'" y2="'+(H-B)+'"></line>'
-      + '<text class="mgyl" x="'+X(i).toFixed(1)+'" y="'+(H-B+18)+'" text-anchor="middle">'+p.ym.slice(0,4)+'</text>';
+      + '<text class="mgyl" x="'+X(i).toFixed(1)+'" y="'+(H-B+18)+'" text-anchor="'
+      + (X(i) - L < 24 ? 'start' : (W - R - X(i) < 24 ? 'end' : 'middle'))+'">'+p.ym.slice(0,4)+'</text>';
   }).join("");
   var hit = s.map(function(p, i){
     var w = (W - L - R) / (n - 1);
