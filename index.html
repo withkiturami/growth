@@ -623,6 +623,46 @@ table.ov tr.miss td{color:var(--mute)}
 .mtd.up{color:var(--up)} .mtd.dn{color:var(--down)} .mtd.na{color:var(--mute)}
 .mtbl .mosub{display:block;font-size:.72em;font-weight:500;color:var(--mute)}
 .mtbl .mtd .mtdp{font-size:.78em;font-weight:600;opacity:.85;white-space:nowrap}
+/* ══ 월별 상세 보기 표 (요청 2026-09-23) ══
+   모바일 : 표 글씨·좌우 여백이 커서 표가 화면보다 넓어지고, 카드와 그래프까지
+   오른쪽으로 밀려 잘렸다 → 화면 폭 안에 들어오게 줄인다.
+   데스크톱 : 카드를 75% 로 줄였으니 표 글씨도 같은 비율로 */
+.mcard.full{min-width:0;max-width:100%}
+.mcard.full .mtbl-wrap{overflow-x:auto}
+@media (min-width:641px){
+  .mcard.full .mtbl-bar th,.mcard.full .mtbl-bar td{padding-top:10.5px!important;padding-bottom:10.5px!important}
+  .mcard.full .mtbl-bar .mval .mv{font-size:19.5px}
+  .mcard.full .mtbl-bar.mtbl thead th{font-size:16.2px!important}
+  .mcard.full .mtbl-bar tbody th{font-size:15.8px}
+  .mcard.full .mtbl-bar .mtd{font-size:16.5px}
+  .mcard.full .mtbl-bar.mtbl thead th:first-child,.mcard.full .mtbl-bar tbody th:first-child,
+  .mcard.full .mtbl-bar tbody td:first-child{padding-left:22px;padding-right:10px}
+  .mcard.full .mtbl-bar.mtbl thead th:last-child,.mcard.full .mtbl-bar tbody th:last-child,
+  .mcard.full .mtbl-bar tbody td:last-child{padding-left:10px;padding-right:22px}
+}
+@media (max-width:640px){
+  .mcard.full .mtbl{width:100%;table-layout:auto}
+  .mcard.full .mtbl th,.mcard.full .mtbl td{padding:8px 5px!important}
+  .mcard.full .mtbl-bar th,.mcard.full .mtbl-bar td{padding-top:8px!important;padding-bottom:8px!important}
+  .mcard.full .mtbl-bar.mtbl thead th:first-child,.mcard.full .mtbl-bar tbody th:first-child,
+  .mcard.full .mtbl-bar tbody td:first-child{padding-left:8px!important;padding-right:4px!important}
+  .mcard.full .mtbl-bar.mtbl thead th:last-child,.mcard.full .mtbl-bar tbody th:last-child,
+  .mcard.full .mtbl-bar tbody td:last-child{padding-left:4px!important;padding-right:8px!important}
+  .mcard.full .mtbl thead th{font-size:13px!important}
+  .mcard.full .mtbl tbody th{font-size:14px!important}
+  .mcard.full .mtbl .mval .mv{font-size:15px!important;padding-right:5px}
+  .mcard.full .mtbl .mtd{font-size:14px!important}
+  .mcard.full .mtbl .mtd .mtdp{font-size:.8em;display:block}   /* 증감률은 금액 아래 줄로 : 칸 폭 절약 */
+  .mcard.full .mtbl th,.mcard.full .mtbl td{vertical-align:middle}
+  /* 막대를 칸 위아래 가운데에 두고 높이를 글자에 맞춘다 (두 줄 칸 때문에 막대가 길어지고 글자와 어긋났다) */
+  .mcard.full .mtbl-bar .mval .bar{top:50%!important;bottom:auto!important;height:28px;transform:translateY(-50%)}
+  .mcard.full .mtbl-wrap{max-height:360px}
+}
+@media (max-width:380px){
+  .mcard.full .mtbl .mval .mv{font-size:14px!important}
+  .mcard.full .mtbl .mtd{font-size:13px!important}
+  .mcard.full .mtbl tbody th{font-size:13px!important}
+}
 /* ══ 모바일 (요청 2026-09-23) ══
    · 기간 버튼 4개가 글씨가 커서 두 줄로 꺾였다 → 한 줄, 네 칸 같은 폭
    · 월별 이력 카드가 너무 길다 → 그래프 높이를 줄이고 요약 칸 간격을 좁힌다 */
