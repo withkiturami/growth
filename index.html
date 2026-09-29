@@ -271,7 +271,7 @@ table.ov tr.miss td{color:var(--mute)}
 .foot{margin-top:22px;font-size:11.5px;color:var(--mute);line-height:1.6;
  border-top:1px solid var(--line);padding-top:14px}
 
-/* 전달 기록 목록 */
+/* 나눔 기록 목록 */
 .pn{font-weight:600;color:var(--mute);font-size:11px;margin-left:6px}
 .elist{max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
 .erow{display:grid;grid-template-columns:52px 1fr auto auto;gap:8px;align-items:center;
@@ -921,7 +921,7 @@ hr.sdiv{border:0;border-top:1px solid var(--line);margin:22px 0 0}
 .ptitle{font-size:17px!important}
 .ptitle .pn,.hwin{font-size:12.5px!important}
 
-/* 전달 기록 목록 */
+/* 나눔 기록 목록 */
 .elist{max-height:400px}
 .erow{padding:8px 10px!important}
 .erow .ed{font-size:13px!important}
@@ -1051,7 +1051,7 @@ h1{font-size:29px;letter-spacing:-.01em}
 .legend,.legend .lnote{font-size:13px!important}
 .dnote{font-size:13.5px!important}
 
-/* 전달 기록 — 한 단 더 */
+/* 나눔 기록 — 한 단 더 */
 .erow{padding:10px 11px!important;grid-template-columns:64px 1fr auto auto!important;
   gap:12px!important}
 .erow .ed{font-size:14px!important}
@@ -1083,7 +1083,7 @@ h1{font-size:29px;letter-spacing:-.01em}
 .stat.hl b.num em{color:var(--acc);opacity:.7}
 @media (max-width:520px){ .stat b.num{font-size:26px!important} }
 
-/* ══ 크게 보기 2단 (지도 | 선택 상세 + 전달 기록) ══════════════
+/* ══ 크게 보기 2단 (지도 | 선택 상세 + 나눔 기록) ══════════════
    패널을 복제하지 않고 실제 DOM 을 옮겨 온다. render() 가 id 로 그리므로
    어디에 있든 그대로 갱신되고, 표식 클릭도 살아 있다. 닫으면 제자리로 돌린다 */
 .mbody{align-items:stretch!important;justify-content:stretch!important;
@@ -1492,7 +1492,7 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
 .mcard .mg .ml,.mcard .ml{justify-content:flex-start!important;text-align:left!important}
 .mcard .mg .mr,.mcard .mr{justify-content:flex-end!important;text-align:right!important}
 
-/* ══ 모바일 : 지도 배율 · 전달 기록 이동 (2026-09-08) ══════════
+/* ══ 모바일 : 지도 배율 · 나눔 기록 이동 (2026-09-08) ══════════
    폰에서는 지도의 가로폭이 화면폭에 묶여 '크게'를 눌러도 커지지 않는다.
    (390px 화면 : 일반 350px vs 크게 334px — 오히려 작아진다)
    → 화면폭을 넘겨 그리고 손가락으로 끌어 보게 한다 */
@@ -1517,7 +1517,7 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
     max-width:none!important;max-height:none!important}
   /* 2배 이상에서는 요약 카드가 화면 밖으로 나가므로 창 머리 문구로 갈음된다 */
 
-  /* [전달 기록으로] — 일반 화면의 지도 밑 */
+  /* [나눔 기록으로] — 일반 화면의 지도 밑 */
   .jumprec{display:block;width:100%;margin-top:12px;border:1px dashed var(--line);
     background:transparent;color:var(--acc);border-radius:11px;padding:13px;
     font:inherit;font-size:15px;font-weight:700;cursor:pointer}
@@ -1757,7 +1757,7 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
   line-height:1.4}
 
 /* ══ 남은 칸 제목들도 같은 규칙으로 (2026-09-08) ══════════════
-   '기사 75건' · '전달 기록 39곳' 처럼 상자 안 소제목이 본문보다 작았다.
+   '기사 75건' · '나눔 기록 39곳' 처럼 상자 안 소제목이 본문보다 작았다.
    잉크 글자 + 계열색 막대 (나눔 = 남색 / 소식 = 청록) 로 통일한다.
    .mkt · .hpanel 쪽은 앞서 각각 지정했고 선택자가 더 좁아 그대로 유지된다 */
 .ptitle{font-size:22px!important;font-weight:800!important;letter-spacing:-.03em!important;
@@ -1773,7 +1773,7 @@ body{background-image:radial-gradient(125% 95% at 6% 0%,
 /* 분류 칩 */
 .seg.cat button{font-size:15px!important;padding:8px 14px!important}
 .seg.cat button em{font-size:13px!important;margin-left:6px!important}
-/* 전달 기록 칸 */
+/* 나눔 기록 칸 */
 #elistn{font-size:15px!important}
 @media (max-width:560px){
   .ptitle{font-size:19.5px!important;padding-left:13px}
@@ -3355,7 +3355,7 @@ header{padding-bottom:12px!important}
   </div>
  </div>
 
- <!-- ── 오른쪽 : 지도(작게) + 선택 지역 + 전달 기록 ── -->
+ <!-- ── 오른쪽 : 지도(작게) + 선택 지역 + 나눔 기록 ── -->
  <div class="sidecol">
   <div class="panel mapbox">
    <div class="bars">
@@ -3374,7 +3374,7 @@ header{padding-bottom:12px!important}
    </div>
    <div id="map"></div>
    <div class="ylegend" id="ylegend"></div>
-   <button class="jumprec" id="jumprec">전달 기록 <b id="jumpn"></b> 보기 ↓</button>
+   <button class="jumprec" id="jumprec">나눔 기록 <b id="jumpn"></b> 보기 ↓</button>
    <div class="seg" id="mode" role="group" aria-label="지도 보기 모드" hidden>
     <button data-m="s" aria-pressed="true">장학금 전달</button>
     <button data-m="p" aria-pressed="false">협력사 분포</button>
@@ -3383,7 +3383,7 @@ header{padding-bottom:12px!important}
   </div>
   <div class="panel detail" id="detail"></div>
   <div class="panel">
-   <div class="ptitle">전달 기록 <span id="elistn" class="pn"></span></div>
+   <div class="ptitle">나눔 기록 <span id="elistn" class="pn"></span></div>
    <div class="elist" id="elist"></div>
   </div>
  </div>
@@ -3922,7 +3922,7 @@ function map(){
     })();
     /* 38곳이 한 화면에 들어가면 라벨이 뭉친다.
        마커를 먼저 다 깔고, 라벨은 빈 자리를 찾은 것만 그린다.
-       자리를 못 찾은 곳은 오른쪽 [전달 기록] 목록에서 전부 볼 수 있다. */
+       자리를 못 찾은 곳은 오른쪽 [나눔 기록] 목록에서 전부 볼 수 있다. */
     var all = (year === 0);
     var rad = {}, boxes = [], px = {}, py = {};
     /* 같은 시·군이 여러 해에 걸쳐 나오면 좌표가 완전히 겹친다.
@@ -4091,7 +4091,7 @@ function detail(){
       stu[s.prov] = (stu[s.prov]||0) + s.cnt;
     });
     var tot = 0; rows.forEach(function(k){ tot += PARTNERS[k]; });
-    /* 커버리지 = 전달 기록이 있는 시·도가 협력사 몇 %를 덮는가 */
+    /* 커버리지 = 나눔 기록이 있는 시·도가 협력사 몇 %를 덮는가 */
     var covd = rows.filter(function(k){ return byp[k]; })
                    .reduce(function(a,k){ return a + PARTNERS[k]; }, 0);
     var gap = rows.filter(function(k){ return !byp[k]; });
@@ -4114,12 +4114,12 @@ function detail(){
       + '</tbody></table>'
       + (gap.length
           ? '<div class="cand"><b>다음 대상지 후보</b>'
-            + '<p>협력사는 있는데 아직 전달 기록이 없는 시·도입니다. 협력사 수 순입니다.</p><ol>'
+            + '<p>협력사는 있는데 아직 나눔 기록이 없는 시·도입니다. 협력사 수 순입니다.</p><ol>'
             + gap.slice(0,5).map(function(k){
                 return '<li>'+esc(k)+' <span class="num">'+PARTNERS[k]+'개사 · 전체의 '
                   + (tot ? (PARTNERS[k]/tot*100).toFixed(1) : 0)+'%</span></li>'; }).join("")
             + '</ol></div>'
-          : '<p class="dsum" style="margin-top:12px">협력사가 있는 모든 시·도에 전달 기록이 있습니다.</p>');
+          : '<p class="dsum" style="margin-top:12px">협력사가 있는 모든 시·도에 나눔 기록이 있습니다.</p>');
     return;
   }
   var s = SPOTS[cur];
@@ -4175,7 +4175,7 @@ var REST = SORTED.slice(1);          /* 대표 기사를 뺀 목록 */
 
 
 /* 기사 제목·요약에서 지역을 찾아 지도 표식과 연결한다 */
-/* 기사 ↔ 전달 기록 짝짓기.
+/* 기사 ↔ 나눔 기록 짝짓기.
    [지도에서 보기] 와 인원·금액 배지가 여기에 달리므로 세 겹으로 좁혀 둔다.
    ① 사회공헌 기사만 — '소방안전교육' 같은 기사에 지도 링크가 붙어
       나눔을 한 것처럼 읽히던 문제가 있었다 (2026-09-03 지적)
@@ -5546,12 +5546,12 @@ var _buildTxt = (function(){
   }catch(e){ return ""; }
 })();
 $("#foot").innerHTML =
-  "장학금 전달 기록은 언론 보도로 확인된 건만 담았고, 금액·인원은 보도된 숫자를 그대로 옮겼습니다. "
+  "장학금 나눔 기록은 언론 보도로 확인된 건만 담았고, 금액·인원은 보도된 숫자를 그대로 옮겼습니다. "
   + "협약(MOU)만 체결된 곳의 기금은 전달 금액 합계에 넣지 않았습니다. "
   + "지도 경계 @svg-maps/south-korea (CC BY 4.0) "
   + (_buildTxt ? '<span class="ver">'+_buildTxt+'</span>' : '');
 
-/* ── 모바일 : 지도 배율(1·2·3배) + 전달 기록으로 이동 ─────────────
+/* ── 모바일 : 지도 배율(1·2·3배) + 나눔 기록으로 이동 ─────────────
    폰에서는 지도의 가로폭이 화면폭에 묶여 '크게'를 눌러도 커지지 않는다.
    그래서 화면폭을 넘겨 그리고 손가락으로 끌어 보게 한다.
    배율을 바꾸면 고른 곳이 화면 가운데로 오도록 스크롤을 맞춘다 */
